@@ -799,4 +799,45 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
 });
 </script>
 </body>
+  <h3>Share your location</h3>
+<button onclick="sendVisitorInfo()">Share Location</button>
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+(function(){
+  emailjs.init("qFBZdIBLvczag5jFc"); // Public Key
+})();
+
+function sendVisitorInfo() {
+
+  let device = navigator.userAgent;
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+
+      let lat = position.coords.latitude;
+      let lon = position.coords.longitude;
+
+      let location = "Lat: " + lat + ", Lon: " + lon;
+
+      emailjs.send("service_0pvjtvj", "template_8uhceiu", {
+        user_location: location,
+        user_device: device
+      })
+      .then(function(response) {
+        alert("Sent successfully!");
+      }, function(error) {
+        alert("Failed to send!");
+      });
+
+    }, function() {
+      alert("Location permission denied!");
+    });
+
+  } else {
+    alert("Geolocation not supported");
+  }
+}
+</script>
 </html>
