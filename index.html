@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <meta name="google-site-verification" content="kbCJediYM87DvVTc0s9c91AY0J-hpHyso0JwZQQrVCY" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amshar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── THEME VARIABLES ── */
+[data-theme="dark"]{
+  --bg:#080810;--bg2:#0e0e1a;--bg3:#141424;
+  --text:#f0eee8;--muted:#8a8799;--border:rgba(255,255,255,0.09);
+  --card-bg:#0e0e1a;--nav-bg:rgba(8,8,16,0.92);
+  --input-bg:#0e0e1a;--overlay-bg:rgba(8,8,16,0.98);
+}
+[data-theme="light"]{
+  --bg:#f5f4f0;--bg2:#ffffff;--bg3:#eceae3;
+  --text:#1a1a2e;--muted:#6b6980;--border:rgba(0,0,0,0.1);
+  --card-bg:#ffffff;--nav-bg:rgba(245,244,240,0.95);
+  --input-bg:#ffffff;--overlay-bg:rgba(245,244,240,0.98);
+}
+
+:root{
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Space Grotesk',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --pink:#ff2d78;--blue:#2d8eff;--orange:#ff6a00;
+  --green:#00d97e;--red:#ff3b3b;--purple:#a855f7;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:400;line-height:1.7;overflow-x:hidden;transition:background 0.4s,color 0.4s;}
+
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--pink);border-radius:2px;}
+
+/* ── PRELOADER ── */
+#preloader{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.5rem;
+  transition:opacity 0.6s ease, visibility 0.6s ease;
+}
+#preloader.hide{opacity:0;visibility:hidden;}
+
+.pre-name{
+  font-family:var(--serif);
+  font-size:clamp(2.5rem,8vw,6rem);
+  background:linear-gradient(135deg,var(--text) 30%,var(--pink) 65%,var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  overflow:hidden;
+  white-space:nowrap;
+  max-width:0;
+  animation:typeReveal 1.6s cubic-bezier(0.22,1,0.36,1) 0.3s forwards;
+  letter-spacing:-0.02em;
+}
+@keyframes typeReveal{
+  0%{max-width:0;opacity:0;}
+  10%{opacity:1;}
+  100%{max-width:600px;opacity:1;}
+}
+
+.pre-tagline{
+  font-family:var(--mono);font-size:0.75rem;letter-spacing:0.3em;
+  text-transform:uppercase;color:var(--muted);
+  opacity:0;animation:fadeUp 0.7s ease 1.8s forwards;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.pre-bar{
+  width:180px;height:2px;background:var(--border);border-radius:2px;overflow:hidden;
+  opacity:0;animation:fadeUp 0.5s ease 1.9s forwards;
+}
+.pre-bar-fill{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--pink),var(--blue),var(--orange));
+  animation:loadBar 1.2s ease 2s forwards;
+}
+@keyframes loadBar{from{width:0;}to{width:100%;}}
+
+.pre-dots{display:flex;gap:8px;opacity:0;animation:fadeUp 0.5s ease 1.9s forwards;}
+.pre-dots span{
+  width:6px;height:6px;border-radius:50%;background:var(--muted);
+  animation:bounce 1s ease-in-out infinite;
+}
+.pre-dots span:nth-child(2){animation-delay:0.15s;}
+.pre-dots span:nth-child(3){animation-delay:0.3s;}
+
+/* ── RAINBOW BUTTON ── */
+.rbtn{position:relative;display:inline-block;padding:0.85rem 2rem;font-family:var(--mono);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;text-decoration:none;color:var(--text);background:var(--bg2);border:none;cursor:pointer;border-radius:4px;z-index:0;transition:color 0.3s,transform 0.2s;}
+.rbtn::before{content:'';position:absolute;inset:-2px;border-radius:6px;background:linear-gradient(90deg,var(--pink),var(--blue),var(--orange),var(--green),var(--red),var(--purple),var(--pink));background-size:300% 100%;animation:rborder 3s linear infinite;z-index:-1;}
+.rbtn::after{content:'';position:absolute;inset:2px;background:var(--bg2);border-radius:3px;z-index:-1;}
+.rbtn:hover{color:#fff;transform:translateY(-1px);}
+@keyframes rborder{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 4rem;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);transition:background 0.4s;}
+.nav-logo{font-family:var(--serif);font-size:1.3rem;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:0.5rem;}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--blue));animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.5);}}
+.nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center;}
+.nav-links a{font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-decoration:none;letter-spacing:0.12em;text-transform:uppercase;transition:color 0.25s;}
+.nav-links a:hover{color:var(--text);}
+
+/* NAV CONTROLS (theme + lang) */
+.nav-controls{display:flex;align-items:center;gap:0.6rem;margin-left:1rem;}
+.ctrl-btn{
+  background:var(--bg2);border:1px solid var(--border);color:var(--muted);
+  padding:0.35rem 0.75rem;border-radius:100px;font-family:var(--mono);
+  font-size:0.6rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.25s;
+  display:flex;align-items:center;gap:0.4rem;text-transform:uppercase;
+}
+.ctrl-btn:hover{border-color:var(--pink);color:var(--text);}
+.ctrl-btn.active{border-color:var(--pink);color:var(--pink);}
+
+/* HAMBURGER */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--muted);border-radius:2px;transition:all 0.3s;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+/* MOBILE MENU */
+.mobile-menu{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:190;
+  background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:2rem;
+}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{font-family:var(--mono);font-size:1rem;color:var(--muted);text-decoration:none;letter-spacing:0.15em;text-transform:uppercase;transition:color 0.25s;}
+.mobile-menu a:hover{color:var(--pink);}
+.mobile-menu .nav-controls{margin:1rem 0 0;flex-wrap:wrap;justify-content:center;}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:8rem 4rem 5rem;position:relative;overflow:hidden;}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:0.1;pointer-events:none;}
+.blob-1{width:500px;height:500px;background:var(--pink);top:-150px;right:-100px;}
+.blob-2{width:400px;height:400px;background:var(--blue);bottom:-100px;left:-100px;}
+.blob-3{width:280px;height:280px;background:var(--purple);top:50%;left:45%;}
+.hero-inner{max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr auto;gap:4rem;align-items:center;}
+
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:1.2rem;margin-bottom:1rem;}
+.status-item{display:flex;align-items:center;gap:0.4rem;font-family:var(--mono);font-size:0.68rem;color:var(--muted);}
+.status-val{color:var(--text);font-weight:500;}
+.signal-icon{display:flex;align-items:flex-end;gap:2px;height:14px;}
+.signal-icon span{display:block;width:3px;border-radius:1px;background:var(--muted);}
+.signal-icon span.on{background:var(--green);}
+.signal-icon span:nth-child(1){height:4px;}
+.signal-icon span:nth-child(2){height:7px;}
+.signal-icon span:nth-child(3){height:10px;}
+.signal-icon span:nth-child(4){height:14px;}
+.battery-icon{position:relative;width:22px;height:11px;border:1.5px solid var(--muted);border-radius:2px;}
+.battery-icon::after{content:'';position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:2.5px;height:5px;background:var(--muted);border-radius:0 1px 1px 0;}
+.battery-fill{position:absolute;left:1px;top:1px;bottom:1px;border-radius:1px;background:var(--green);transition:width 0.5s;}
+
+/* CLOCK */
+.clock-wrap{display:inline-flex;align-items:center;gap:0.6rem;font-family:var(--mono);font-size:0.78rem;color:var(--green);margin-bottom:1.2rem;padding:0.45rem 1rem;border:1px solid rgba(0,217,126,0.25);border-radius:100px;background:rgba(0,217,126,0.06);}
+.clock-icon-img{width:14px;height:14px;object-fit:contain;filter:brightness(0) saturate(100%) invert(72%) sepia(42%) saturate(500%) hue-rotate(100deg);}
+
+/* HERO BADGE */
+.hero-badge{display:inline-flex;align-items:center;gap:0.6rem;font-family:var(--mono);font-size:0.63rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.5rem;padding:0.5rem 1rem;border:1px solid var(--border);border-radius:100px;background:var(--bg2);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-in-out infinite;}
+
+/* NAME ROW — animated on scroll into view */
+.hero-name-row{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;flex-wrap:wrap;}
+.hero-name{
+  font-family:var(--serif);font-size:clamp(3.5rem,6vw,6rem);line-height:1.05;
+  background:linear-gradient(135deg,var(--text) 30%,var(--pink) 65%,var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  /* animated reveal */
+  opacity:0;transform:translateY(30px);
+  animation:heroNameIn 1s cubic-bezier(0.22,1,0.36,1) 3.4s forwards;
+}
+@keyframes heroNameIn{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+/* glitter shimmer on name */
+.hero-name::after{
+  content:'Amshar';
+  position:absolute;left:0;top:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.6) 50%,transparent 100%);
+  background-size:200% 100%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s linear 4.5s infinite;
+  pointer-events:none;
+}
+.hero-name-row{position:relative;}
+@keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
+
+.blue-tick{width:clamp(28px,4vw,48px);height:clamp(28px,4vw,48px);object-fit:contain;flex-shrink:0;margin-top:0.3rem;}
+.hero-sub{font-family:var(--serif);font-style:italic;font-size:1.1rem;color:var(--muted);margin-bottom:1.5rem;}
+.hero-desc{font-size:1rem;color:var(--muted);max-width:480px;line-height:1.85;margin-bottom:2.5rem;}
+.hero-desc strong{color:var(--text);font-weight:500;}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;}
+
+/* QURAN VERSE HIGHLIGHT */
+.quran-verse{
+  display:inline-block;
+  font-family:var(--serif);font-style:italic;
+  font-size:clamp(1.1rem,2.2vw,1.55rem);
+  font-weight:700;
+  background:linear-gradient(120deg,var(--orange) 0%,var(--pink) 50%,var(--purple) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  border-left:3px solid var(--orange);
+  padding:0.5rem 0 0.5rem 1.1rem;
+  margin-bottom:1.6rem;
+  line-height:1.45;
+  letter-spacing:0.01em;
+}
+.quran-ref{display:block;font-family:var(--mono);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;-webkit-text-fill-color:var(--muted);background:none;-webkit-background-clip:unset;background-clip:unset;}
+
+/* AVATAR */
+.avatar-wrap{position:relative;width:220px;height:220px;flex-shrink:0;}
+.avatar-ring{position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(var(--pink),var(--blue),var(--orange),var(--green),var(--purple),var(--pink));animation:spin 4s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.avatar-inner{position:absolute;inset:3px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.avatar-initials{font-family:var(--serif);font-size:4rem;color:var(--text);line-height:1;}
+
+/* ── LOGOS STRIP ── */
+.logos-strip{overflow:hidden;padding:2rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);}
+.logos-track{display:flex;align-items:center;gap:3rem;width:max-content;animation:logoScroll 18s linear infinite;}
+.logos-track:hover{animation-play-state:paused;}
+@keyframes logoScroll{from{transform:translateX(0);}to{transform:translateX(-50%)}}
+.logo-item{display:flex;align-items:center;flex-shrink:0;}
+.logo-item img{height:42px;width:auto;max-width:100px;object-fit:contain;filter:grayscale(1) brightness(0.7);transition:filter 0.3s;}
+.logo-item img:hover{filter:grayscale(0) brightness(1);}
+[data-theme="light"] .logo-item img{filter:grayscale(1) brightness(0.4);}
+[data-theme="light"] .logo-item img:hover{filter:grayscale(0) brightness(1);}
+
+/* ── PHOTO LIBRARY SECTION ── */
+.photos-sec{padding:6rem 4rem;max-width:1200px;margin:0 auto;}
+.photo-grid-preview{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2rem;}
+.photo-thumb{aspect-ratio:1;border-radius:10px;background:var(--bg2);border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2rem;transition:transform 0.25s,border-color 0.25s;}
+.photo-thumb:hover{transform:scale(1.04);border-color:var(--pink);}
+.photo-lib-btn{display:inline-flex;align-items:center;gap:0.6rem;margin-top:2rem;}
+@media(max-width:768px){
+  .photo-grid-preview{grid-template-columns:repeat(2,1fr);}
+  .photos-sec{padding:4rem 1.5rem;}
+}
+
+/* ── SECTIONS ── */
+.sec{padding:6rem 4rem;max-width:1200px;margin:0 auto;}
+.sec-dark{background:var(--bg2);}
+.sec-alt{background:var(--bg3);}
+.sec-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.75rem;}
+.sec-line-sm{width:1.5rem;height:1px;background:var(--border);display:inline-block;}
+.sec-title{font-family:var(--serif);font-size:clamp(2rem,3.5vw,2.8rem);color:var(--text);font-weight:400;margin-bottom:3rem;}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:4rem;align-items:start;}
+.about-p{color:var(--muted);font-size:0.95rem;line-height:1.9;margin-bottom:1.1rem;}
+.about-p strong{color:var(--text);font-weight:500;}
+.hl-pink{color:var(--pink);}
+.hl-blue{color:var(--blue);}
+.hl-green{color:var(--green);}
+.info-cards{display:flex;flex-direction:column;gap:0.9rem;}
+.info-card{border:1px solid var(--border);background:var(--bg);padding:1rem 1.25rem;border-radius:8px;display:flex;align-items:center;gap:1rem;transition:border-color 0.3s,transform 0.25s;}
+.info-card:hover{transform:translateX(5px);}
+.info-card:nth-child(1):hover{border-color:var(--pink);}
+.info-card:nth-child(2):hover{border-color:var(--blue);}
+.info-card:nth-child(3):hover{border-color:var(--orange);}
+.info-card:nth-child(4):hover{border-color:var(--green);}
+.info-card:nth-child(5):hover{border-color:var(--purple);}
+.info-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.ic-pink{background:rgba(255,45,120,0.12);}
+.ic-blue{background:rgba(45,142,255,0.12);}
+.ic-orange{background:rgba(255,106,0,0.12);}
+.ic-green{background:rgba(0,217,126,0.12);}
+.ic-purple{background:rgba(168,85,247,0.12);}
+.info-key{font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;display:block;}
+.info-val{font-size:0.88rem;color:var(--text);font-weight:500;}
+.info-icon img{width:20px;height:20px;object-fit:contain;}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:1.5rem;}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--pink),var(--blue),var(--orange),var(--green),transparent);}
+.tl-entry{position:relative;padding:0 0 3rem 3rem;}
+.tl-dot{position:absolute;left:-7px;top:5px;width:13px;height:13px;border-radius:50%;border:2px solid var(--bg2);}
+.tl-dot.pink{background:var(--pink);box-shadow:0 0 10px var(--pink);}
+.tl-dot.blue{background:var(--blue);box-shadow:0 0 10px var(--blue);}
+.tl-dot.orange{background:var(--orange);box-shadow:0 0 10px var(--orange);}
+.tl-dot.green{background:var(--green);box-shadow:0 0 10px var(--green);}
+.tl-dot.purple{background:var(--purple);box-shadow:0 0 10px var(--purple);}
+.tl-year{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.35rem;}
+.tl-year.pink{color:var(--pink);}.tl-year.blue{color:var(--blue);}.tl-year.orange{color:var(--orange);}.tl-year.green{color:var(--green);}.tl-year.purple{color:var(--purple);}
+.tl-title{font-family:var(--serif);font-size:1.25rem;color:var(--text);font-weight:400;margin-bottom:0.25rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
+.tl-school-logo{width:36px;height:36px;object-fit:contain;border-radius:4px;}
+.tl-place{font-family:var(--mono);font-size:0.67rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.7rem;}
+.tl-body{font-size:0.9rem;color:var(--muted);line-height:1.8;max-width:580px;}
+.tl-body strong{color:var(--text);}
+.tl-badge{display:inline-block;margin-top:0.7rem;font-family:var(--mono);font-size:0.6rem;padding:0.22rem 0.7rem;border-radius:100px;letter-spacing:0.1em;text-transform:uppercase;}
+.tl-badge.pink{background:rgba(255,45,120,0.15);color:var(--pink);}
+.tl-badge.blue{background:rgba(45,142,255,0.15);color:var(--blue);}
+.tl-badge.orange{background:rgba(255,106,0,0.15);color:var(--orange);}
+.tl-badge.green{background:rgba(0,217,126,0.15);color:var(--green);}
+.tl-badge.purple{background:rgba(168,85,247,0.15);color:var(--purple);}
+
+/* DIARY */
+.diary-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;}
+.diary-text h3{font-family:var(--serif);font-size:1.7rem;color:var(--text);font-weight:400;margin-bottom:1rem;}
+.diary-text p{font-size:0.92rem;color:var(--muted);line-height:1.85;margin-bottom:1.5rem;}
+.diary-text p strong{color:var(--text);}
+.diary-card{border:1px solid var(--border);border-radius:12px;background:var(--bg2);overflow:hidden;}
+.diary-top{height:3px;background:linear-gradient(90deg,var(--pink),var(--blue),var(--orange));}
+.diary-entry{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);}
+.diary-entry:last-of-type{border-bottom:none;}
+.diary-date{font-family:var(--mono);font-size:0.6rem;color:var(--pink);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.3rem;}
+.diary-etitle{font-family:var(--serif);font-size:0.95rem;color:var(--text);font-weight:400;margin-bottom:0.25rem;}
+.diary-snip{font-size:0.78rem;color:var(--muted);line-height:1.6;}
+.diary-foot{padding:1rem 1.5rem;text-align:center;}
+
+/* MAP */
+.map-section{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:2rem;}
+.map-header{padding:1rem 1.5rem;background:var(--bg2);border-bottom:1px solid var(--border);}
+.map-title-txt{font-family:var(--mono);font-size:0.7rem;color:var(--text);letter-spacing:0.1em;text-transform:uppercase;}
+.map-sub-txt{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-top:0.2rem;}
+.map-frame{width:100%;height:280px;border:none;display:block;}
+
+/* CONTACT */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;}
+.contact-h{font-family:var(--serif);font-size:1.7rem;color:var(--text);font-weight:400;margin-bottom:1rem;}
+.contact-p{font-size:0.92rem;color:var(--muted);line-height:1.85;margin-bottom:2rem;}
+.social-links{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;}
+.social-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.2rem;border:1px solid var(--border);border-radius:100px;font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-decoration:none;transition:all 0.3s;}
+.social-btn:hover{border-color:var(--pink);color:var(--text);}
+.social-btn.wa:hover{border-color:var(--green);color:var(--green);}
+.social-logo{width:18px;height:18px;object-fit:contain;border-radius:3px;}
+
+/* FORM */
+.contact-form{display:flex;flex-direction:column;gap:1rem;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-group{display:flex;flex-direction:column;gap:0.4rem;}
+.form-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+.form-input,.form-textarea{background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:0.8rem 1rem;font-family:var(--sans);font-size:0.88rem;font-weight:300;outline:none;border-radius:6px;transition:border-color 0.3s,box-shadow 0.3s;width:100%;resize:none;}
+.form-input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,45,120,0.1);}
+.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(45,142,255,0.1);}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted);font-size:0.82rem;}
+.form-status{font-family:var(--mono);font-size:0.75rem;padding:0.75rem 1rem;border-radius:6px;display:none;text-align:center;}
+.form-status.sending{background:rgba(255,255,255,0.04);color:var(--muted);border:1px solid var(--border);display:block;}
+.form-status.success{background:rgba(0,217,126,0.12);color:var(--green);border:1px solid rgba(0,217,126,0.3);display:block;}
+.form-status.error{background:rgba(255,59,59,0.12);color:var(--red);border:1px solid rgba(255,59,59,0.3);display:block;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2rem 4rem;display:flex;justify-content:space-between;align-items:center;}
+.footer-txt{font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+.footer-txt span{background:linear-gradient(90deg,var(--pink),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* DIARY OVERLAY */
+.diary-overlay{position:fixed;inset:0;z-index:500;background:var(--overlay-bg);display:none;flex-direction:column;overflow-y:auto;}
+.diary-overlay.open{display:flex;}
+.diary-overlay-inner{max-width:760px;margin:0 auto;padding:4rem 2rem;width:100%;}
+.diary-ov-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;}
+.diary-ov-title{font-family:var(--serif);font-size:2rem;color:var(--text);}
+.diary-close-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:0.5rem 1.2rem;cursor:pointer;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;border-radius:4px;transition:all 0.2s;}
+.diary-close-btn:hover{border-color:var(--pink);color:var(--pink);}
+.launch-card{border-radius:16px;padding:4px;background:linear-gradient(135deg,var(--pink),var(--blue),var(--orange),var(--green));background-size:200% 200%;animation:rborder 3s linear infinite;}
+.launch-inner{background:var(--bg2);border-radius:13px;padding:3rem;text-align:center;}
+.launch-icon{font-size:3rem;display:block;margin-bottom:1rem;}
+.launch-title{font-family:var(--serif);font-size:1.8rem;color:var(--text);margin-bottom:0.5rem;}
+.launch-sub{font-family:var(--mono);font-size:0.7rem;color:var(--pink);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:2rem;}
+.countdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.cd-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.2rem 0.5rem;text-align:center;}
+.cd-num{font-family:var(--serif);font-size:2.5rem;color:var(--text);display:block;line-height:1;}
+.cd-lbl{font-family:var(--mono);font-size:0.55rem;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;margin-top:0.35rem;display:block;}
+.launch-note{font-size:0.88rem;color:var(--muted);line-height:1.8;}
+.launch-note strong{color:var(--text);}
+
+/* CHAT */
+.chat-toggle{position:fixed;bottom:2rem;right:2rem;z-index:300;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;}
+.chat-toggle::before{content:'';position:absolute;inset:-2px;border-radius:50%;background:linear-gradient(90deg,var(--pink),var(--blue),var(--orange),var(--green),var(--pink));background-size:300% 100%;animation:rborder 3s linear infinite;z-index:-1;}
+.chat-toggle::after{content:'';position:absolute;inset:2px;background:var(--bg2);border-radius:50%;z-index:-1;}
+.chat-toggle img{width:30px;height:30px;object-fit:cover;border-radius:50%;position:relative;z-index:1;}
+.chat-window{position:fixed;bottom:6.5rem;right:2rem;z-index:299;width:340px;height:480px;border-radius:16px;background:var(--bg2);border:1px solid var(--border);display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.chat-window.open{display:flex;}
+.chat-header-bar{height:3px;background:linear-gradient(90deg,var(--pink),var(--blue),var(--orange));}
+.chat-header{padding:1rem 1.25rem;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.chat-title{font-family:var(--serif);font-size:1rem;color:var(--text);}
+.chat-online{font-family:var(--mono);font-size:0.6rem;color:var(--green);}
+.chat-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.75rem;}
+.chat-msgs::-webkit-scrollbar{width:2px;}
+.msg{max-width:82%;padding:0.65rem 0.9rem;border-radius:12px;font-size:0.82rem;line-height:1.6;}
+.msg.bot{background:var(--bg3);color:var(--muted);border-radius:12px 12px 12px 2px;align-self:flex-start;}
+.msg.bot strong{color:var(--text);}
+.msg.user{background:rgba(255,45,120,0.15);color:var(--text);border-radius:12px 12px 2px 12px;align-self:flex-end;}
+.msg.typing{display:flex;gap:4px;align-items:center;padding:0.8rem;}
+.msg.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1.2s ease-in-out infinite;}
+.msg.typing span:nth-child(2){animation-delay:0.2s;}
+.msg.typing span:nth-child(3){animation-delay:0.4s;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+.chat-input-row{padding:0.75rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;}
+.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.6rem 0.9rem;border-radius:8px;font-family:var(--sans);font-size:0.82rem;outline:none;transition:border-color 0.2s;}
+.chat-input:focus{border-color:var(--pink);}
+.chat-input::placeholder{color:var(--muted);}
+.chat-send{background:var(--pink);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1rem;flex-shrink:0;}
+.chat-send:hover{opacity:0.85;}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;}
+  .nav-links{display:none;}
+  .hamburger{display:flex;}
+  .hero{padding:7rem 1.5rem 4rem;}
+  .hero-inner{grid-template-columns:1fr;}
+  .avatar-wrap{display:none;}
+  .sec{padding:4rem 1.5rem;}
+  .about-grid,.diary-grid,.contact-grid{grid-template-columns:1fr;gap:2.5rem;}
+  .hero-btns{flex-direction:column;align-items:flex-start;}
+  footer{flex-direction:column;gap:0.75rem;padding:1.5rem;text-align:center;}
+  .form-row{grid-template-columns:1fr;}
+  .chat-window{width:calc(100vw - 2rem);right:1rem;}
+  .countdown-grid{grid-template-columns:repeat(2,1fr);}
+  .cd-num{font-size:1.8rem;}
+  .nav-controls{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ PRELOADER ═══ -->
+<div id="preloader">
+  <div class="pre-dots"><span></span><span></span><span></span></div>
+  <div class="pre-name">Amshar</div>
+  <div class="pre-tagline">Portfolio &amp; Diary</div>
+  <div class="pre-bar"><div class="pre-bar-fill"></div></div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a href="#" class="nav-logo"><span class="nav-dot"></span>Amshar</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about" data-en="About" data-ta="என்னை பற்றி">About</a></li>
+    <li><a href="#journey" data-en="Journey" data-ta="பயணம்">Journey</a></li>
+    <li><a href="#photos" data-en="Photos" data-ta="படங்கள்">Photos</a></li>
+    <li><a href="#contact" data-en="Contact" data-ta="தொடர்பு">Contact</a></li>
+    <li class="nav-controls" style="display:flex;">
+      <button class="ctrl-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙 <span data-en="Dark" data-ta="இருள்">Dark</span></button>
+      <button class="ctrl-btn active" id="langToggle" onclick="toggleLang()">EN</button>
+    </li>
+  </ul>
+  <div class="nav-controls" id="navControls">
+    <button class="ctrl-btn" id="themeToggle2" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="ctrl-btn active" id="langToggle2" onclick="toggleLang()">EN</button>
+  </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about" onclick="toggleMenu()" data-en="About" data-ta="என்னை பற்றி">About</a>
+  <a href="#journey" onclick="toggleMenu()" data-en="Journey" data-ta="பயணம்">Journey</a>
+  <a href="#photos" onclick="toggleMenu()" data-en="Photos" data-ta="படங்கள்">Photos</a>
+  <a href="#contact" onclick="toggleMenu()" data-en="Contact" data-ta="தொடர்பு">Contact</a>
+  <div class="nav-controls" style="display:flex;margin-top:1.5rem;">
+    <button class="ctrl-btn" onclick="toggleTheme();toggleMenu()">🌙 <span data-en="Dark" data-ta="இருள்">Dark</span></button>
+    <button class="ctrl-btn active" onclick="toggleLang();toggleMenu()" id="langToggle3">EN</button>
+  </div>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="hero-inner">
+    <div>
+      <!-- STATUS BAR -->
+      <div class="status-bar">
+        <div class="status-item">
+          <div class="signal-icon">
+            <span class="on"></span><span class="on"></span><span class="on"></span><span id="sig4" class="on"></span>
+          </div>
+          <span class="status-val" id="signal-txt">Full</span>
+        </div>
+        <div class="status-item">
+          <div class="battery-icon"><div class="battery-fill" id="batt-fill" style="width:80%"></div></div>
+          <span class="status-val" id="batt-txt">--</span>
+        </div>
+      </div>
+      <!-- CLOCK -->
+      <div class="clock-wrap">
+        <img class="clock-icon-img" src="https://www.citypng.com/public/uploads/preview/white-clock-icon-symbol-png-7017516950329550pxgzdsjmg.png" alt="clock">
+        <span id="colombo-clock">--:--:-- --</span>&nbsp;·&nbsp;Colombo, LK
+      </div>
+      <div class="hero-badge"><span class="live-dot"></span>275/4, Warana Road, Thihariya, Kalagedihena &nbsp;·&nbsp; Sri Lanka</div>
+      <!-- NAME -->
+      <div class="hero-name-row">
+        <h1 class="hero-name">Amshar</h1>
+        <img class="blue-tick" src="https://www.citypng.com/public/uploads/preview/hd-blue-badge-verified-tick-mark-png-704081694710438adyvtbqafw.png" alt="Verified">
+      </div>
+      <p class="hero-sub" style="display:none"></p>
+      <div class="quran-verse">
+        Indeed, with hardship will be ease.
+        <span class="quran-ref">— Quran 94:6</span>
+      </div>
+      <p class="hero-desc">Age <strong id="hero-age">17</strong>. Born in <strong>Thihariya</strong>. Studying hard and building towards something great. This is my story.</p>
+      <div class="hero-btns">
+        <a href="#journey" class="rbtn" data-en="My Journey" data-ta="என் பயணம்">My Journey</a>
+        <a href="#photos" class="rbtn" data-en="Photos" data-ta="படங்கள்">Photos</a>
+        <a href="#contact" class="rbtn" data-en="Say Hello" data-ta="வணக்கம் சொல்லுங்கள்">Say Hello</a>
+      </div>
+    </div>
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <div class="avatar-inner"><span class="avatar-initials">AM</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOGOS STRIP ═══ -->
+<div class="logos-strip">
+  <div class="logos-track" id="logosTrack">
+    <!-- Set 1 -->
+    <div class="logo-item"><img src="https://osdem-dfec-sc.org/_next/image?url=%2Fimages%2Flogo%2Fdfec-logo.webp&w=256&q=75" alt="DFEC Logo" onerror="this.style.display='none'"></div>
+    <div class="logo-item"><img src="https://exams.dssc.edu.lk/img/D._S._Senanayake_College_crest.2e477a8c.png" alt="DS Senanayake College" onerror="this.style.display='none'"></div>
+    <div class="logo-item"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdHelZ81hk-fd_TAvp2mZhVt3XWSum6hzVxXWQZyjzkQ&s" alt="Logo 3" onerror="this.style.display='none'"></div>
+    <div class="logo-item"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2ep0ZWdbf0lFR_W0qSbYYZx8IRjJ8J8zeTJO2rntZrw&s" alt="Logo 4" onerror="this.style.display='none'"></div>
+    <div class="logo-item"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIY2u92RHqwPeHtR9nM7j8bBsf9axn9KQKGix1Pi3tmA&s=10" alt="Logo 5" onerror="this.style.display='none'"></div>
+    <!-- Set 2 (duplicate for seamless loop) -->
+    <div class="logo-item"><img src="https://osdem-dfec-sc.org/_next/image?url=%2Fimages%2Flogo%2Fdfec-logo.webp&w=256&q=75" alt="DFEC Logo" onerror="this.style.display='none'"></div>
+    <div class="logo-item"><img src="https://exams.dssc.edu.lk/img/D._S._Senanayake_College_crest.2e477a8c.png" alt="DS Senanayake College" onerror="this.style.display='none'"></div>
+    <div class="logo-item"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdHelZ81hk-fd_TAvp2mZhVt3XWSum6hzVxXWQZyjzkQ&s" alt="Logo 3" onerror="this.style.display='none'"></div>
+    <div class="logo-item"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2ep0ZWdbf0lFR_W0qSbYYZx8IRjJ8J8zeTJO2rntZrw&s" alt="Logo 4" onerror="this.style.display='none'"></div>
+    <div class="logo-item"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIY2u92RHqwPeHtR9nM7j8bBsf9axn9KQKGix1Pi3tmA&s=10" alt="Logo 5" onerror="this.style.display='none'"></div>
+  </div>
+</div>
+
+<!-- ═══ ABOUT ═══ -->
+<section class="sec" id="about">
+  <div class="sec-label"><span style="color:var(--pink)">01</span><span class="sec-line-sm"></span><span data-en="Who I Am" data-ta="நான் யார்">Who I Am</span></div>
+  <h2 class="sec-title" data-en="About Me" data-ta="என்னை பற்றி">About Me</h2>
+  <div class="about-grid">
+    <div>
+      <p class="about-p">My name is <strong>Amshar</strong>, a <strong><span id="about-age">17</span> year old</strong> student from Sri Lanka. I was born in <strong>2009</strong> in <span class="hl-pink">Thihariya</span>, and from a very young age I had a drive to push myself further than expected.</p>
+      <p class="about-p">My early education began at <span class="hl-blue">Crescent International School (CIS)</span>, Thihariya, in the Montessori batch of <strong>2013/2014</strong>. That is where my love for learning first started growing.</p>
+      <p class="about-p">In <strong>2019</strong>, I sat the national scholarship exam and scored <span class="hl-green">167 marks</span>, earning me a place at the prestigious <strong>DS Senanayake College, Colombo 07</strong>. Six remarkable years there, all the way through to my <strong>O/Levels in 2025/2026</strong>.</p>
+      <p class="about-p">Now I am at <strong>OSDEM Dickwella</strong>, deep in my A/Levels, focused on Biology. I am someone who values quiet focus and personal reflection.</p>
+      <p class="about-p">Every step has been intentional. This site is a small window into my life, where I have been and where I am going.</p>
+    </div>
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-icon ic-pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#ff2d78"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#ff2d78" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div><span class="info-key">Born</span><span class="info-val">2009 · Age <span id="card-age">17</span> · Thihariya</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon ic-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="10" width="18" height="11" rx="2" stroke="#2d8eff" stroke-width="2"/><path d="M7 10V7a5 5 0 0110 0v3" stroke="#2d8eff" stroke-width="2"/></svg></div>
+        <div><span class="info-key">Previous School</span><span class="info-val">DS Senanayake College, Colombo 07</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon ic-orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3L2 9l10 6 10-6-10-6z" stroke="#ff6a00" stroke-width="2" stroke-linejoin="round"/><path d="M2 15l10 6 10-6" stroke="#ff6a00" stroke-width="2" stroke-linejoin="round"/></svg></div>
+        <div><span class="info-key">Current School</span><span class="info-val">OSDEM Dickwella</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon ic-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 19h16M4 15h16M4 11h10M4 7h6" stroke="#00d97e" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div><span class="info-key">Studying</span><span class="info-val">Biology · A/Levels</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ JOURNEY ═══ -->
+<div class="sec-dark" id="journey">
+  <div class="sec">
+    <div class="sec-label"><span style="color:var(--blue)">02</span><span class="sec-line-sm"></span><span data-en="My Story" data-ta="என் கதை">My Story</span></div>
+    <h2 class="sec-title" data-en="Life Journey" data-ta="வாழ்க்கை பயணம்">Life Journey</h2>
+    <div class="timeline">
+      <div class="tl-entry">
+        <div class="tl-dot pink"></div>
+        <div class="tl-year pink">2009 — The Beginning</div>
+        <div class="tl-title">Born in Thihariya</div>
+        <div class="tl-place">Thihariya, Gampaha District, Sri Lanka</div>
+        <p class="tl-body">Thihariya is a town situated in the Gampaha District of Sri Lanka. It is known as one of the good cities in Gampaha, where many educated people have studied and grown up, helping to develop the town over the years. It carries a natural beauty that simply cannot be described in words. Insha Allah, I also want to be a part of developing my town if I get a chance to do so one day.</p>
+        <span class="tl-badge pink">Home</span>
+      </div>
+      <div class="tl-entry">
+        <div class="tl-dot blue"></div>
+        <div class="tl-year blue">2013/2014 — Montessori</div>
+        <div class="tl-title">Crescent International School (CIS)</div>
+        <div class="tl-place">Thihariya · Montessori Batch 2013/2014</div>
+        <p class="tl-body">The first classroom. CIS in Thihariya is where the love of learning was born. Those early years built the discipline and curiosity that carried everything forward. It was the foundation of everything that followed.</p>
+        <span class="tl-badge blue">Foundation</span>
+      </div>
+      <div class="tl-entry">
+        <div class="tl-dot orange"></div>
+        <div class="tl-year orange">Primary Education</div>
+        <div class="tl-title">My Primary Education</div>
+        <div class="tl-place">Dharussalam Primary School &amp; Al-Badriya Maha Vidyalaya</div>
+        <p class="tl-body">I had the chance to study at both <strong>Dharussalam Primary School, Thihariya</strong> and <strong>Al-Badriya Maha Vidyalaya, Kahatowita</strong> for my primary education. While at Al-Badriya Maha Vidyalaya, I sat the Grade 5 scholarship exam just as all students do at that stage. I scored <strong>167 marks</strong>, which opened the door to one of the most prestigious schools in Sri Lanka. Hard work had spoken for itself.</p>
+        <span class="tl-badge orange">Achievement</span>
+      </div>
+      <div class="tl-entry">
+        <div class="tl-dot green"></div>
+        <div class="tl-year green">2019 — 2025</div>
+        <div class="tl-title">DS Senanayake College, Colombo 07 <img src="https://upload.wikimedia.org/wikipedia/en/d/d4/D._S._Senanayake_College_crest.png" alt="DS Logo" class="tl-school-logo"></div>
+        <div class="tl-place">Colombo 07 · 6 Years</div>
+        <p class="tl-body">Six years at one of Sri Lanka's finest schools. DS Senanayake College is where I grew from a scholarship kid into a <strong>confident and driven young man</strong>. Friendships, challenges, exams and memories. All of it shaped who I am today.</p>
+        <span class="tl-badge green">6 Years Strong</span>
+      </div>
+      <div class="tl-entry">
+        <div class="tl-dot purple"></div>
+        <div class="tl-year purple">2025/2026 — O/Levels Complete</div>
+        <div class="tl-title">Completed Ordinary Level Examinations</div>
+        <div class="tl-place">Sri Lanka · G.C.E. O/Level</div>
+        <p class="tl-body">The O/Levels are done. Every late night and revision session paid off. With this chapter closed, a new one opens. The work does not stop here. If anything, it gets more serious from now on.</p>
+        <span class="tl-badge purple">Milestone</span>
+      </div>
+      <div class="tl-entry">
+        <div class="tl-dot pink"></div>
+        <div class="tl-year pink">Now — Present</div>
+        <div class="tl-title">A/Levels at OSDEM Dickwella</div>
+        <div class="tl-place">OSDEM · Dickwella, Sri Lanka</div>
+        <p class="tl-body">Today I am deep in my A/Level studies at OSDEM Dickwella, <strong>mastering Biology and the sciences</strong>. This is where the real work happens. The hours, the discipline, the focus. Every page turned counts toward the future.</p>
+        <span class="tl-badge pink">Current Chapter</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PHOTO LIBRARY ═══ -->
+<div class="sec-alt" id="photos">
+  <div class="photos-sec">
+    <div class="sec-label"><span style="color:var(--green)">03</span><span class="sec-line-sm"></span><span data-en="Memories" data-ta="நினைவுகள்">Memories</span></div>
+    <h2 class="sec-title" data-en="Photo Library" data-ta="புகைப்பட நூலகம்">Photo Library</h2>
+    <p class="about-p" style="max-width:560px;">A collection of moments, places and people that have shaped the journey so far. Every photo holds a story.</p>
+    <div class="photo-lib-btn">
+      <a href="photo.html" class="rbtn" data-en="Photos" data-ta="படங்கள்">Photos</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONTACT ═══ -->
+<section class="sec" id="contact">
+  <div class="sec-label"><span style="color:var(--purple)">04</span><span class="sec-line-sm"></span><span data-en="Say Hello" data-ta="வணக்கம் சொல்லுங்கள்">Say Hello</span></div>
+  <h2 class="sec-title" data-en="Contact" data-ta="தொடர்பு">Contact</h2>
+  <div class="contact-grid">
+    <div>
+      <h3 class="contact-h" data-en="Want to connect?" data-ta="தொடர்பு கொள்ள விரும்புகிறீர்களா?">Want to connect?</h3>
+      <p class="contact-p" data-en="Whether you want to share advice, collaborate or just say hello, I would love to hear from you. Fill in the form or reach out directly below." data-ta="ஆலோசனை பகிர விரும்பினாலும், ஒத்துழைக்க விரும்பினாலும் அல்லது வெறுமனே வணக்கம் சொல்ல விரும்பினாலும், உங்களிடமிருந்து கேட்க விரும்புகிறேன்.">Whether you want to share advice, collaborate or just say hello, I would love to hear from you. Fill in the form or reach out directly below.</p>
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="info-icon ic-pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="2" stroke="#ff2d78" stroke-width="2"/><path d="M2 8l10 6 10-6" stroke="#ff2d78" stroke-width="2"/></svg></div>
+          <div><span class="info-key">Email</span><span class="info-val" id="email-display">Amsharjk&#64;gmail.com</span></div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon ic-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#00d97e" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="#00d97e" stroke-width="2"/></svg></div>
+          <div><span class="info-key">Location</span><span class="info-val">Thihariya, Sri Lanka</span></div>
+        </div>
+      </div>
+      <div class="social-links">
+        <a href="https://instagram.com/amshar__jk" target="_blank" class="social-btn">
+          <img class="social-logo" src="https://troyredfern.com/wp-content/uploads/2021/04/new-instagram-logo-white-border-icon-png-large.png" alt="Instagram">
+          @amshar__jk
+        </a>
+        <a href="https://wa.me/94750776668" target="_blank" class="social-btn wa">
+          <img class="social-logo" src="https://i.pinimg.com/564x/9a/9f/15/9a9f15138998651cc789a4654ccce6a4.jpg" alt="WhatsApp" style="border-radius:50%;">
+          WhatsApp
+        </a>
+      </div>
+      <div class="map-section">
+        <div class="map-header">
+          <div class="map-title-txt">Where I Am</div>
+          <div class="map-sub-txt">275/4, Warana Road, Thihariya, Kalagedihena</div>
+        </div>
+        <iframe class="map-frame" src="https://maps.google.com/maps?q=7.1207951,80.0769337&z=18&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+    <div>
+      <div class="contact-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" data-en="Name" data-ta="பெயர்">Name</label>
+            <input class="form-input" id="from_name" type="text" placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-en="Email" data-ta="மின்னஞ்சல்">Email</label>
+            <input class="form-input" id="from_email" type="email" placeholder="your@email.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-en="Subject" data-ta="தலைப்பு">Subject</label>
+          <input class="form-input" id="subject" type="text" placeholder="What is this about?">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-en="Message" data-ta="செய்தி">Message</label>
+          <textarea class="form-textarea" id="message" rows="6" placeholder="Say something..."></textarea>
+        </div>
+        <div class="form-status" id="form-status"></div>
+        <button class="rbtn" id="send-btn" onclick="sendEmail()" data-en="Send Message" data-ta="செய்தி அனுப்பு">Send Message</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <span class="footer-txt">© 2025 <span>Amshar</span> · Sri Lanka</span>
+  <span class="footer-txt">Built with foundation.</span>
+</footer>
+
+
+<!-- ═══ AI CHAT ═══ -->
+<button class="chat-toggle" onclick="toggleChat()" title="AI Assistant">
+  <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg" alt="AI">
+</button>
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header-bar"></div>
+  <div class="chat-header">
+    <div>
+      <div class="chat-title">Ask About Amshar</div>
+      <div class="chat-online">&#9679; AI Assistant Online</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">&#10005;</button>
+  </div>
+  <div class="chat-msgs" id="chatMessages">
+    <div class="msg bot">Hello! I am an AI assistant for this portfolio. Feel free to ask me anything about <strong>Amshar</strong>, his journey, studies or ambitions!</div>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Ask something..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">&#10148;</button>
+  </div>
+</div>
+
+<!-- ═══ NOTIFICATION SOUND ═══ -->
+<audio id="introSound" preload="auto">
+  <!-- A short chime encoded as a tiny base64 WAV - charge/notification style -->
+  <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgn8PAvIZeOjuEx9jSuJJpS0mRxd7duZlwV1ek1Oroyr2lk4qOrMba3N/g4eTp7vHz9vj5+/z9/v7+/f38+/n39fPx7+3s6+nq6+zt7u/x8vT29/n6+/z9/v7//v79/Pv6+Pf19PPy8fDv7+/w8PHy8/T19vf3+Pn5+vr7+/z8/f7+/v7+/f39/Pz7+/r6+fn5+Pj39/b29vX19PT09PT09PT09fX19vb39/j4+fn6+vr7+/z8/P39/f7+/v7+/v7+/v7+/f39/Pz8+/v7+vr5+fn4+Pj3+Pj49/f3+Pj4+fn5+vr7+/v8/P39/v7+/v7+/f39/Pz7+/r6+fn4+Pf39/b29vb29vb39/j4+fn6+vr7+/z8/f39/v7+/v7+/f39/Pz7+/r6+fn4+Pj39/f39/f39/f3+Pj5+fn6+vr7+/z8/P39/v7+/v7+/v39/Pz7+/r6+fn4+Pj39/f3+Pj5+fn6+vr7+/z8/P39/v7+/v4=" type="audio/wav">
+</audio>
+
+<script>
+// ── PRELOADER ──
+window.addEventListener('load', function() {
+  // Play notification sound as name appears
+  setTimeout(function() {
+    var snd = document.getElementById('introSound');
+    if (snd) {
+      snd.volume = 0.5;
+      snd.play().catch(function(){});
+    }
+  }, 400);
+
+  // Hide preloader after animation completes
+  setTimeout(function() {
+    var pre = document.getElementById('preloader');
+    pre.classList.add('hide');
+    setTimeout(function(){ pre.style.display='none'; }, 700);
+  }, 3300);
+});
+
+// ── THEME TOGGLE ──
+var isDark = true;
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  var labels = ['Dark','இருள்'];
+  var newLabel = isDark ? '🌙' : '☀️';
+  ['themeToggle','themeToggle2'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.innerHTML = newLabel + (el.id==='themeToggle'?' <span data-en="Dark" data-ta="இருள்">'+(isDark?'Dark':'Light')+'</span>':'');
+  });
+  localStorage.setItem('theme', isDark?'dark':'light');
+}
+// Restore saved theme
+(function(){
+  var saved = localStorage.getItem('theme');
+  if(saved==='light'){ isDark=true; toggleTheme(); }
+})();
+
+// ── LANGUAGE TOGGLE ──
+var currentLang = 'en';
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'ta' : 'en';
+  applyLang(currentLang);
+  ['langToggle','langToggle2','langToggle3'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.textContent = currentLang === 'en' ? 'EN' : 'தமிழ்';
+  });
+  localStorage.setItem('lang', currentLang);
+}
+function applyLang(lang) {
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var val = lang === 'ta' ? el.getAttribute('data-ta') : el.getAttribute('data-en');
+    if(val) el.textContent = val;
+  });
+}
+(function(){
+  var saved = localStorage.getItem('lang');
+  if(saved==='ta'){ currentLang='en'; toggleLang(); }
+})();
+
+// ── HAMBURGER MENU ──
+function toggleMenu() {
+  var menu = document.getElementById('mobileMenu');
+  var ham  = document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  ham.classList.toggle('open');
+  document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+}
+
+// ── AGE CALCULATOR ──
+function calcAge() {
+  var dob = new Date(2009, 2, 18);
+  var now = new Date();
+  var age = now.getFullYear() - dob.getFullYear();
+  var m = now.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+  ['hero-age','about-age','card-age'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.textContent = age;
+  });
+}
+calcAge();
+
+// ── EMAIL DISPLAY ──
+document.getElementById('email-display').textContent = ['Amsharjk','gmail.com'].join('@');
+
+// ── CLOCK ──
+function pad(n){ return n < 10 ? '0'+n : ''+n; }
+function updateClock() {
+  var utcMs = Date.now() + (new Date().getTimezoneOffset() * 60000);
+  var sl = new Date(utcMs + 19800000);
+  var H = sl.getHours(), M = sl.getMinutes(), S = sl.getSeconds();
+  var ampm = H >= 12 ? 'PM' : 'AM';
+  H = H % 12; if(!H) H = 12;
+  document.getElementById('colombo-clock').textContent = pad(H)+':'+pad(M)+':'+pad(S)+' '+ampm;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── BATTERY ──
+function updateBattery() {
+  if(navigator.getBattery) {
+    navigator.getBattery().then(function(b){
+      var pct = Math.round(b.level * 100);
+      document.getElementById('batt-txt').textContent = pct+'%';
+      var fill = document.getElementById('batt-fill');
+      fill.style.width = pct+'%';
+      fill.style.background = pct > 20 ? '#00d97e' : '#ff3b3b';
+    });
+  } else {
+    document.getElementById('batt-txt').textContent = 'N/A';
+  }
+}
+function updateSignal() {
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  var bars = 4, label = 'Full';
+  if(conn){
+    var t = conn.effectiveType;
+    if(t==='4g'){bars=4;label='4G';}
+    else if(t==='3g'){bars=3;label='3G';}
+    else if(t==='2g'){bars=2;label='2G';}
+    else if(t==='slow-2g'){bars=1;label='Weak';}
+  }
+  document.getElementById('signal-txt').textContent = label;
+  document.querySelectorAll('.signal-icon span').forEach(function(s,i){
+    s.classList.toggle('on', i < bars);
+  });
+}
+updateBattery(); updateSignal();
+setInterval(updateBattery, 30000);
+
+// ── EMAILJS ──
+emailjs.init('qFBZdIBLvczag5jFc');
+
+function sendEmail() {
+  var s  = document.getElementById('form-status');
+  var n  = document.getElementById('from_name').value.trim();
+  var e  = document.getElementById('from_email').value.trim();
+  var su = document.getElementById('subject').value.trim();
+  var m  = document.getElementById('message').value.trim();
+
+  if(!n || !e || !m){
+    s.className = 'form-status error';
+    s.textContent = 'Please fill in your name, email and message.';
+    return;
+  }
+
+  s.className = 'form-status sending';
+  s.textContent = 'Sending your message, please wait...';
+
+  // Send notification to Amshar
+  emailjs.send('service_0pvjtvj', 'template_8uhceiu', {
+    from_name:  n,
+    from_email: e,
+    subject:    su || '(No subject)',
+    message:    m
+  }).then(function() {
+    // Auto-reply to sender
+    emailjs.send('service_0pvjtvj', 'template_8uhceiu', {
+      from_name:  'Amshar',
+      from_email: 'Amsharjk@gmail.com',
+      to_email:   e,
+      to_name:    n,
+      subject:    'Re: ' + (su || 'Your message'),
+      message:    'Thank you so much for reaching out. I truly appreciate you taking the time to send me a message. At the moment, I am unable to respond personally because I am currently studying at OSDEM in Dickwella and have very limited access to my devices. I will get back to you as soon as I possibly can. Thank you for your patience and understanding. — Amshar'
+    }).catch(function(){});
+
+    s.className = 'form-status success';
+    s.textContent = 'Your message was sent! An auto-reply has been sent to your email. I will respond as soon as possible.';
+    document.getElementById('from_name').value  = '';
+    document.getElementById('from_email').value = '';
+    document.getElementById('subject').value    = '';
+    document.getElementById('message').value    = '';
+  }, function(err) {
+    s.className = 'form-status error';
+    s.textContent = 'Could not send. Email directly: Amsharjk' + '@' + 'gmail.com';
+    console.error(err);
+  });
+}
+
+// ── AI CHAT ──
+function toggleChat() { document.getElementById('chatWindow').classList.toggle('open'); }
+async function sendChat() {
+  var input = document.getElementById('chatInput');
+  var text  = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  addMsg(text,'user');
+  var typing = addTyping();
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:300,
+        system:'You are a warm AI assistant on the portfolio of Amshar, a student born 18 March 2009 in Thihariya, Sri Lanka. He is an introvert. He scored 167 marks in his scholarship exam, studied at DS Senanayake College Colombo 07, now studies Biology at OSDEM Dickwella for A/Levels. His dream is to be a doctor. Answer briefly and warmly.',
+        messages:[{role:'user',content:text}]
+      })
+    });
+    var data = await res.json();
+    typing.remove();
+    addMsg((data.content&&data.content[0])?data.content[0].text:'This feature will be coming soon!','bot');
+  } catch(e) {
+    typing.remove();
+    addMsg('This feature will be coming soon! Contact me via email or Instagram for now.','bot');
+  }
+}
+function addMsg(text,type){
+  var b=document.getElementById('chatMessages'),d=document.createElement('div');
+  d.className='msg '+type; d.textContent=text; b.appendChild(d); b.scrollTop=b.scrollHeight; return d;
+}
+function addTyping(){
+  var b=document.getElementById('chatMessages'),d=document.createElement('div');
+  d.className='msg bot typing'; d.innerHTML='<span></span><span></span><span></span>';
+  b.appendChild(d); b.scrollTop=b.scrollHeight; return d;
+}
+
+// ── SMOOTH SCROLL ──
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var t=document.querySelector(a.getAttribute('href'));
+    if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); }
+  });
+});
+</script>
+</body>
+</html>
