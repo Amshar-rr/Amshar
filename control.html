@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Panel and Personal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+[data-theme="dark"]{
+  --bg:#080810;--bg2:#0e0e1a;--bg3:#141424;
+  --text:#f0eee8;--muted:#8a8799;--border:rgba(255,255,255,0.09);
+  --card-bg:#0e0e1a;--nav-bg:rgba(8,8,16,0.92);
+  --input-bg:#0e0e1a;--overlay-bg:rgba(8,8,16,0.98);
+}
+[data-theme="light"]{
+  --bg:#f5f4f0;--bg2:#ffffff;--bg3:#eceae3;
+  --text:#1a1a2e;--muted:#6b6980;--border:rgba(0,0,0,0.1);
+  --card-bg:#ffffff;--nav-bg:rgba(245,244,240,0.95);
+  --input-bg:#ffffff;--overlay-bg:rgba(245,244,240,0.98);
+}
+
+:root{
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Space Grotesk',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --pink:#ff2d78;--blue:#2d8eff;--orange:#ff6a00;
+  --green:#00d97e;--red:#ff3b3b;--purple:#a855f7;
+}
+
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:400;line-height:1.7;overflow-x:hidden;transition:background 0.4s,color 0.4s;}
+
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--pink);border-radius:2px;}
+
+/* ── BLOBS ── */
+.blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:0.07;pointer-events:none;z-index:0;}
+.blob-1{width:500px;height:500px;background:var(--pink);top:-150px;right:-100px;}
+.blob-2{width:400px;height:400px;background:var(--blue);bottom:-100px;left:-100px;}
+.blob-3{width:280px;height:280px;background:var(--purple);top:50%;left:45%;}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 0.7s ease, visibility 0.7s ease;
+}
+#loginScreen.hide{opacity:0;visibility:hidden;pointer-events:none;}
+
+.login-box{
+  width:100%;max-width:420px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:3rem 2.5rem;
+  position:relative;z-index:1;
+  animation:loginAppear 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes loginAppear{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+.login-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--pink);
+  border:1px solid rgba(255,45,120,0.3);border-radius:100px;
+  padding:0.3rem 0.9rem;margin-bottom:1.5rem;
+  background:rgba(255,45,120,0.06);
+}
+.login-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--pink);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.5);opacity:0.7;}}
+
+.login-title{
+  font-family:var(--serif);font-size:1.9rem;font-weight:700;
+  margin-bottom:0.4rem;letter-spacing:-0.02em;
+  background:linear-gradient(135deg,var(--text) 40%,var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.login-sub{font-family:var(--mono);font-size:0.68rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:2rem;}
+
+.login-field{margin-bottom:1.2rem;}
+.login-field label{display:block;font-family:var(--mono);font-size:0.63rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem;}
+.login-field input{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:0.8rem 1rem;color:var(--text);
+  font-family:var(--mono);font-size:0.85rem;
+  outline:none;transition:border-color 0.25s,box-shadow 0.25s;
+}
+.login-field input:focus{border-color:rgba(255,45,120,0.5);box-shadow:0 0 0 3px rgba(255,45,120,0.08);}
+
+.login-hint{
+  font-family:var(--mono);font-size:0.62rem;color:var(--muted);
+  margin-bottom:1.8rem;opacity:0.7;
+}
+.login-hint span{color:var(--blue);}
+
+.login-btn{
+  width:100%;position:relative;display:flex;align-items:center;justify-content:center;
+  padding:0.9rem 2rem;font-family:var(--mono);font-size:0.72rem;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--text);background:var(--bg2);
+  border:none;cursor:pointer;border-radius:8px;z-index:0;transition:color 0.3s,transform 0.2s;
+}
+.login-btn::before{
+  content:'';position:absolute;inset:-2px;border-radius:10px;
+  background:linear-gradient(90deg,var(--pink),var(--blue),var(--orange),var(--green),var(--pink));
+  background-size:300% 100%;animation:rborder 3s linear infinite;z-index:-1;
+}
+.login-btn::after{content:'';position:absolute;inset:2px;background:var(--bg2);border-radius:7px;z-index:-1;}
+.login-btn:hover{color:#fff;transform:translateY(-1px);}
+@keyframes rborder{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+
+.login-error{
+  display:none;font-family:var(--mono);font-size:0.7rem;
+  color:var(--red);margin-top:1rem;text-align:center;
+  padding:0.5rem;background:rgba(255,59,59,0.08);border-radius:6px;
+  border:1px solid rgba(255,59,59,0.2);
+}
+.login-error.show{display:block;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 4rem;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:var(--serif);font-size:1.3rem;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:0.5rem;}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--blue));animation:pulse 2s ease-in-out infinite;}
+.nav-right{display:flex;align-items:center;gap:0.8rem;}
+.ctrl-btn{
+  background:var(--bg2);border:1px solid var(--border);color:var(--muted);
+  padding:0.35rem 0.75rem;border-radius:100px;font-family:var(--mono);
+  font-size:0.6rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.25s;
+  text-transform:uppercase;
+}
+.ctrl-btn:hover{border-color:var(--pink);color:var(--text);}
+.logout-btn{
+  background:rgba(255,45,120,0.07);border:1px solid rgba(255,45,120,0.3);
+  color:var(--pink);padding:0.35rem 0.9rem;border-radius:100px;
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;
+  cursor:pointer;transition:all 0.25s;text-transform:uppercase;
+}
+.logout-btn:hover{background:rgba(255,45,120,0.18);border-color:var(--pink);}
+
+/* ── MAIN CONTENT ── */
+#mainContent{display:none;padding-top:80px;position:relative;z-index:1;}
+#mainContent.visible{display:block;animation:fadeUp 0.6s ease forwards;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── HERO SECTION ── */
+.page-hero{padding:5rem 4rem 3rem;max-width:1200px;margin:0 auto;}
+.page-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--border);border-radius:100px;
+  padding:0.3rem 0.9rem;margin-bottom:1.5rem;
+}
+.page-title{
+  font-family:var(--serif);font-size:clamp(2.2rem,6vw,4rem);font-weight:700;
+  letter-spacing:-0.03em;line-height:1.1;margin-bottom:0.8rem;
+}
+.page-title span{
+  background:linear-gradient(135deg,var(--pink) 20%,var(--blue) 80%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.page-subtitle{font-family:var(--mono);font-size:0.75rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;}
+.page-note{
+  font-size:0.95rem;color:var(--muted);max-width:600px;
+  border-left:2px solid rgba(255,45,120,0.4);padding-left:1rem;
+  font-style:italic;margin-top:1rem;
+}
+
+/* ── SECTION WRAPPER ── */
+.sections{max-width:1200px;margin:0 auto;padding:0 4rem 6rem;}
+.section{margin-bottom:3rem;}
+.sec-label{
+  font-family:var(--mono);font-size:0.62rem;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--pink);margin-bottom:1.2rem;
+  display:flex;align-items:center;gap:0.8rem;
+}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── CARDS ── */
+.card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:12px;padding:1.6rem 1.8rem;margin-bottom:1rem;
+  transition:border-color 0.25s,transform 0.2s;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--pink),var(--blue));border-radius:3px 0 0 3px;
+  opacity:0;transition:opacity 0.25s;
+}
+.card:hover{border-color:rgba(255,45,120,0.25);transform:translateX(4px);}
+.card:hover::before{opacity:1;}
+
+.card-title{
+  font-family:var(--serif);font-size:1.05rem;font-weight:700;
+  margin-bottom:0.5rem;color:var(--text);
+}
+.card-tag{
+  display:inline-block;font-family:var(--mono);font-size:0.6rem;
+  letter-spacing:0.12em;text-transform:uppercase;color:var(--pink);
+  background:rgba(255,45,120,0.08);border:1px solid rgba(255,45,120,0.2);
+  border-radius:100px;padding:0.2rem 0.6rem;margin-bottom:0.6rem;
+}
+.card-content{font-size:0.93rem;color:var(--muted);line-height:1.75;}
+.card-content strong{color:var(--text);font-weight:600;}
+
+/* ── PEOPLE LIST ── */
+.people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;}
+.person-card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:12px;padding:1.2rem 1.4rem;
+  transition:border-color 0.25s,transform 0.2s;
+}
+.person-card:hover{border-color:rgba(45,142,255,0.3);transform:translateY(-2px);}
+.person-num{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-bottom:0.3rem;}
+.person-name{font-family:var(--serif);font-size:1rem;font-weight:700;margin-bottom:0.4rem;}
+.person-meta{font-family:var(--mono);font-size:0.68rem;color:var(--muted);}
+.person-meta a{color:var(--blue);text-decoration:none;}
+.person-meta a:hover{text-decoration:underline;}
+.person-birthday{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  margin-top:0.4rem;font-family:var(--mono);font-size:0.65rem;
+  color:var(--green);background:rgba(0,217,126,0.07);
+  border:1px solid rgba(0,217,126,0.2);border-radius:100px;
+  padding:0.15rem 0.55rem;
+}
+
+/* ── BATCH GRID ── */
+.batch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.7rem;}
+.batch-item{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:0.7rem 1rem;
+  font-family:var(--mono);font-size:0.72rem;
+  display:flex;align-items:center;gap:0.6rem;
+  transition:border-color 0.2s;
+}
+.batch-item:hover{border-color:rgba(255,45,120,0.3);}
+.batch-num{
+  min-width:26px;height:26px;border-radius:6px;
+  background:linear-gradient(135deg,rgba(255,45,120,0.15),rgba(45,142,255,0.15));
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;color:var(--muted);font-weight:600;
+}
+.batch-name{color:var(--text);line-height:1.4;}
+
+/* ── TEACHERS ── */
+.teacher-card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:12px;padding:1.3rem 1.5rem;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:1rem;margin-bottom:0.8rem;
+  transition:border-color 0.25s;
+}
+.teacher-card:hover{border-color:rgba(168,85,247,0.3);}
+.teacher-grade{font-family:var(--mono);font-size:0.62rem;color:var(--purple);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem;}
+.teacher-name{font-family:var(--serif);font-size:1rem;font-weight:700;}
+.teacher-phone{font-family:var(--mono);font-size:0.7rem;color:var(--muted);text-align:right;}
+.teacher-phone a{color:var(--green);text-decoration:none;}
+.teacher-phone a:hover{text-decoration:underline;}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:2rem 4rem;text-align:center;
+  font-family:var(--mono);font-size:0.65rem;color:var(--muted);
+  letter-spacing:0.1em;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;}
+  .page-hero,.sections{padding-left:1.5rem;padding-right:1.5rem;}
+  .page-title{font-size:clamp(1.8rem,8vw,3rem);}
+  .people-grid{grid-template-columns:1fr;}
+  .batch-grid{grid-template-columns:repeat(2,1fr);}
+  .teacher-card{flex-direction:column;}
+  .teacher-phone{text-align:left;}
+}
+</style>
+</head>
+<body>
+
+<!-- BLOBS -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="loginScreen">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="login-box">
+    <div class="login-badge">🔐 Restricted Access</div>
+    <div class="login-title">Control Panel</div>
+    <div class="login-sub">// Authorised personnel only</div>
+    <div class="login-field">
+      <label>User ID</label>
+      <input type="text" id="loginUser" placeholder="Enter your user ID" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter your password" autocomplete="off">
+    </div>
+    <div class="login-hint">Hint: <span>Instagram</span></div>
+    <button class="login-btn" onclick="doLogin()">Access System</button>
+    <div class="login-error" id="loginError">Invalid credentials. Access denied.</div>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-dot"></div>
+    CDMC
+  </a>
+  <div class="nav-right">
+    <button class="ctrl-btn" onclick="toggleTheme()">◐ Theme</button>
+    <button class="logout-btn" onclick="doLogout()">⎋ Logout</button>
+  </div>
+</nav>
+
+<!-- ── MAIN CONTENT ── -->
+<div id="mainContent">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="page-badge">// Personal Documentary</div>
+    <div class="page-title">Control Data<br><span>Managing Center</span></div>
+    <div class="page-subtitle">CDMC — School Life Archive</div>
+    <div class="page-note">This is my documentary as my perspective in my school life.</div>
+  </div>
+
+  <div class="sections">
+
+    <!-- ── HONORS ── -->
+    <div class="section">
+      <div class="sec-label">01 — Honors & Recognition</div>
+
+      <div class="card">
+        <div class="card-tag">Most Honored</div>
+        <div class="card-title">Most Honor, Respected & Reliable Person</div>
+        <div class="card-content"><strong>Halaaldeen Abdullah</strong> — The most honorable, respected and reliable person I encountered throughout my entire school career.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Best Friends</div>
+        <div class="card-title">Those Who Helped & Became Unforgettable</div>
+        <div class="card-content">
+          <strong>H. Abdullah, M.A.A. Basith, MJM Ifaaz, Shaham Naadhiy, MI Aqeel, S. Abdullah, MSM Shafni, HIM Nishran, Asjad Ali, Shukri, Arhab, Sahethyan</strong><br><br>
+          All 40 students including me are best friends — especially the people above made another vibe entirely.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Best Teachers</div>
+        <div class="card-title">Teachers Who Stood Out</div>
+        <div class="card-content">
+          <strong>N. Sivakala Madam, Arafath Adam Sir, Pradeep Sir, Aadil Sir</strong><br><br>
+          All teachers taught well but they made fun and kept classes interesting.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ACHIEVEMENTS ── -->
+    <div class="section">
+      <div class="sec-label">02 — Achievements & Titles</div>
+
+      <div class="card">
+        <div class="card-tag">All Rounders</div>
+        <div class="card-title">Best All Rounders</div>
+        <div class="card-content"><strong>Aqeel, Shamith</strong> and <strong>S. Abdullah</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Cricket</div>
+        <div class="card-title">Best Cricket Player</div>
+        <div class="card-content"><strong>Aqeel</strong> — To my perspective, there are no players who played exceptionally well, but his performance was notably good among the rest.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Football</div>
+        <div class="card-title">Best Footballers</div>
+        <div class="card-content"><strong>Arhab, MZ Abdullah, Shamith, Shaham, Dhildar, Shukri</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Football — Defence</div>
+        <div class="card-title">Best Defenders</div>
+        <div class="card-content"><strong>Aqeel, Shukri, Arhab</strong> and <strong>Shaham</strong> as well</div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Football — Goalkeeper</div>
+        <div class="card-title">Best Goalkeepers</div>
+        <div class="card-content"><strong>Mufthi, Yousuf Ammar</strong> (at his last several days)</div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Football — Fun</div>
+        <div class="card-title">The Worst Player in Football</div>
+        <div class="card-content"><strong>Amshar</strong> — Didn't score at least 1 goal in his entire school career, but did score about 5 or 6 own goals. 😂</div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Academics</div>
+        <div class="card-title">Best Mathematician</div>
+        <div class="card-content"><strong>Asjad</strong> and <strong>Basith</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Academics</div>
+        <div class="card-title">Best Programmer</div>
+        <div class="card-content"><strong>Asjad Ali</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Academics</div>
+        <div class="card-title">Best Science Learner</div>
+        <div class="card-content"><strong>Basith</strong> and <strong>Asjad</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Rankings</div>
+        <div class="card-title">Top Performers in Study (Average Rank)</div>
+        <div class="card-content"><strong>Basith, Danushan, Asjad, Amshar, Dhildar</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Rankings</div>
+        <div class="card-title">Top Performers All Time</div>
+        <div class="card-content"><strong>Dinushan</strong> and <strong>Aqdaz</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">Overall</div>
+        <div class="card-title">Top All Rounder</div>
+        <div class="card-content"><strong>Dinushan</strong></div>
+      </div>
+    </div>
+
+    <!-- ── KEY CLASSMATES ── -->
+    <div class="section">
+      <div class="sec-label">03 — Key Classmates (Contact Info)</div>
+      <div class="people-grid">
+
+        <div class="person-card">
+          <div class="person-name">HIM Nishran</div>
+          <div class="person-meta">
+            <a href="mailto:Nishranhome@gmail.com">Nishranhome@gmail.com</a>
+          </div>
+          <div class="person-birthday">🎂 July 04</div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-name">M.A.A. Basith</div>
+          <div class="person-meta">
+            <a href="mailto:Basithashraf623@gmail.com">Basithashraf623@gmail.com</a>
+          </div>
+          <div class="person-birthday">🎂 June 23</div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-name">Shaham Naadhiy</div>
+          <div class="person-meta">
+            <a href="mailto:Shahamnaadhiy6@gmail.com">Shahamnaadhiy6@gmail.com</a>
+          </div>
+          <div class="person-birthday">🎂 May 07</div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-name">Arhab (M.A. Arhab)</div>
+          <div class="person-meta">
+            <a href="mailto:Arhabarshath@gmail.com">Arhabarshath@gmail.com</a>
+          </div>
+          <div class="person-birthday">🎂 June 18</div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-name">MI Aqeel</div>
+          <div class="person-meta">
+            <a href="mailto:Heyaqeel15@gmail.com">Heyaqeel15@gmail.com</a>
+          </div>
+          <div class="person-birthday">🎂 April 21</div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-name">Sameen Shamith</div>
+          <div class="person-meta">
+            <a href="mailto:Sameenshamith@gmail.com">Sameenshamith@gmail.com</a>
+          </div>
+          <div class="person-birthday">🎂 May 04</div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-name">S. Abdullah</div>
+          <div class="person-meta">
+            <a href="mailto:Abdullahsubaideen2009@gmail.com">Abdullahsubaideen2009@gmail.com</a>
+          </div>
+          <div class="person-birthday">🎂 September 10</div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-name">Rashad Ahamed</div>
+          <div class="person-meta">
+            <a href="mailto:Rashadahamed0000@gmail.com">Rashadahamed0000@gmail.com</a>
+          </div>
+          <div class="person-birthday">🎂 November 14</div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-name">Hamdhan</div>
+          <div class="person-meta" style="color:var(--muted);font-size:0.65rem;">No email on record</div>
+          <div class="person-birthday">🎂 July 09</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── BATCH 2025 ── -->
+    <div class="section">
+      <div class="sec-label">04 — Batch of 2025 (2026) O/L</div>
+      <div class="batch-grid">
+        <div class="batch-item"><div class="batch-num">01</div><div class="batch-name">Datshanath</div></div>
+        <div class="batch-item"><div class="batch-num">02</div><div class="batch-name">John Rishon</div></div>
+        <div class="batch-item"><div class="batch-num">03</div><div class="batch-name">Asjad Ali (son of Rikas Ali)</div></div>
+        <div class="batch-item"><div class="batch-num">04</div><div class="batch-name">Jocia Milek</div></div>
+        <div class="batch-item"><div class="batch-num">05</div><div class="batch-name">Yahya Faleel</div></div>
+        <div class="batch-item"><div class="batch-num">06</div><div class="batch-name">Nijath Ahamad</div></div>
+        <div class="batch-item"><div class="batch-num">07</div><div class="batch-name">Naina Muhammad Hamdhan</div></div>
+        <div class="batch-item"><div class="batch-num">08</div><div class="batch-name">Mohammed Irshad Aqeel Ahamed</div></div>
+        <div class="batch-item"><div class="batch-num">09</div><div class="batch-name">Yogeswaran Sahethyen</div></div>
+        <div class="batch-item"><div class="batch-num">10</div><div class="batch-name">Kavishkar</div></div>
+        <div class="batch-item"><div class="batch-num">11</div><div class="batch-name">Halaldeen Abdullah</div></div>
+        <div class="batch-item"><div class="batch-num">12</div><div class="batch-name">Sameen Shamith</div></div>
+        <div class="batch-item"><div class="batch-num">13</div><div class="batch-name">Dhildar Fatheen</div></div>
+        <div class="batch-item"><div class="batch-num">14</div><div class="batch-name">Shukri Muzammil</div></div>
+        <div class="batch-item"><div class="batch-num">15</div><div class="batch-name">Mohammad Ashraf Abdul Basith</div></div>
+        <div class="batch-item"><div class="batch-num">16</div><div class="batch-name">Zameer Abdullah</div></div>
+        <div class="batch-item"><div class="batch-num">17</div><div class="batch-name">Rayid Rifan</div></div>
+        <div class="batch-item"><div class="batch-num">18</div><div class="batch-name">Mohammad Javid Mohammad Ifaaz</div></div>
+        <div class="batch-item"><div class="batch-num">19</div><div class="batch-name">Ramesh Aeron</div></div>
+        <div class="batch-item"><div class="batch-num">20</div><div class="batch-name">Mohammad Sulfar Inamul Hassan</div></div>
+        <div class="batch-item"><div class="batch-num">21</div><div class="batch-name">Crishanthan</div></div>
+        <div class="batch-item"><div class="batch-num">22</div><div class="batch-name">Kashif Safwan</div></div>
+        <div class="batch-item"><div class="batch-num">23</div><div class="batch-name">Thathrukshan</div></div>
+        <div class="batch-item"><div class="batch-num">24</div><div class="batch-name">Dilukshan</div></div>
+        <div class="batch-item"><div class="batch-num">25</div><div class="batch-name">Mohammad Arshath Arhab Ahamed</div></div>
+        <div class="batch-item"><div class="batch-num">26</div><div class="batch-name">Mohammad Shafi Shaham Naadhiy</div></div>
+        <div class="batch-item"><div class="batch-num">27</div><div class="batch-name">Randhima Madushan</div></div>
+        <div class="batch-item"><div class="batch-num">28</div><div class="batch-name">Ahamad Ahusaf Sarahath</div></div>
+        <div class="batch-item"><div class="batch-num">29</div><div class="batch-name">Musab Ahamad</div></div>
+        <div class="batch-item"><div class="batch-num">30</div><div class="batch-name">Mohammad Jawsak Amshar</div></div>
+        <div class="batch-item"><div class="batch-num">31</div><div class="batch-name">Hamzan Mufthi</div></div>
+        <div class="batch-item"><div class="batch-num">32</div><div class="batch-name">Kaleelur Rahman</div></div>
+        <div class="batch-item"><div class="batch-num">33</div><div class="batch-name">Mohammad Shibly Mohammad Safni</div></div>
+        <div class="batch-item"><div class="batch-num">34</div><div class="batch-name">Jayakumar Thivan</div></div>
+        <div class="batch-item"><div class="batch-num">35</div><div class="batch-name">Rashad Ahamed</div></div>
+        <div class="batch-item"><div class="batch-num">36</div><div class="batch-name">Subaideen Abdullah</div></div>
+        <div class="batch-item"><div class="batch-num">37</div><div class="batch-name">Haleem Irshad Mohammad Nishran</div></div>
+        <div class="batch-item"><div class="batch-num">38</div><div class="batch-name">Katheesh Kumar Danushan</div></div>
+        <div class="batch-item"><div class="batch-num">39</div><div class="batch-name">Mohammad Mubashir</div></div>
+        <div class="batch-item"><div class="batch-num">40</div><div class="batch-name">Mohammad Shibly Yoosuf Ammar</div></div>
+      </div>
+    </div>
+
+    <!-- ── TEACHERS ── -->
+    <div class="section">
+      <div class="sec-label">05 — Teachers (Grade-wise)</div>
+
+      <div class="teacher-card">
+        <div>
+          <div class="teacher-grade">Grade 1 &amp; 2</div>
+          <div class="teacher-name">Farwin Teacher</div>
+        </div>
+        <div class="teacher-phone"><a href="tel:+94778026363">+94 77 802 6363</a></div>
+      </div>
+
+      <div class="teacher-card">
+        <div>
+          <div class="teacher-grade">Grade 3</div>
+          <div class="teacher-name">Samsath Bagem Teacher</div>
+        </div>
+        <div class="teacher-phone"><a href="tel:+94772498634">+94 77 249 8634</a></div>
+      </div>
+
+      <div class="teacher-card">
+        <div>
+          <div class="teacher-grade">Grade 3 (also) &amp; Grade 4</div>
+          <div class="teacher-name">Rihana Teacher</div>
+        </div>
+        <div class="teacher-phone"><a href="tel:+94772569435">+94 77 256 9435</a></div>
+      </div>
+
+      <div class="teacher-card">
+        <div>
+          <div class="teacher-grade">Grade 5</div>
+          <div class="teacher-name">Shanaz Teacher (Mom)</div>
+        </div>
+        <div class="teacher-phone" style="color:var(--muted);font-size:0.65rem;">Family ♥</div>
+      </div>
+
+      <div class="teacher-card">
+        <div>
+          <div class="teacher-grade">Grade 6</div>
+          <div class="teacher-name">Jumana Madam</div>
+        </div>
+        <div class="teacher-phone" style="color:var(--muted);font-size:0.65rem;">Contact not found</div>
+      </div>
+
+      <div class="teacher-card">
+        <div>
+          <div class="teacher-grade">Grade 7</div>
+          <div class="teacher-name">Vathsala Madam</div>
+        </div>
+        <div class="teacher-phone"><a href="tel:+94767981856">+94 76 798 1856</a></div>
+      </div>
+
+      <div class="teacher-card">
+        <div>
+          <div class="teacher-grade">Grade 8, 9, 10 &amp; 11</div>
+          <div class="teacher-name">N. Sivakala Madam</div>
+        </div>
+        <div class="teacher-phone"><a href="tel:+94764856228">+94 76 485 6228</a></div>
+      </div>
+
+    </div>
+
+  </div><!-- /sections -->
+
+  <footer>
+    <div>CDMC — Control Data Managing Center</div>
+    <div style="margin-top:0.4rem;color:rgba(138,135,153,0.5);">Personal Documentary · DS Senanayake College · Batch 2025</div>
+  </footer>
+
+</div><!-- /mainContent -->
+
+<script>
+// ── OBFUSCATED CREDENTIALS ──
+// Stored as encoded values — not plainly visible in source inspection
+var _a = atob('YW1zaGFyX19qaw==');   // amshar__jk
+var _b = atob('QW1zaGFyX19qaw==');   // Amshar__jk
+var _c = atob('YTJFM0E2YzM=');        // a2E3A6c3
+
+function doLogin() {
+  var u = document.getElementById('loginUser').value.trim();
+  var p = document.getElementById('loginPass').value;
+  var err = document.getElementById('loginError');
+
+  if ((u === _a || u === _b) && p === _c) {
+    err.classList.remove('show');
+    document.getElementById('loginScreen').classList.add('hide');
+    document.getElementById('mainContent').classList.add('visible');
+    sessionStorage.setItem('cdmc_auth', '1');
+  } else {
+    err.classList.add('show');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('cdmc_auth');
+  document.getElementById('loginScreen').classList.remove('hide');
+  document.getElementById('mainContent').classList.remove('visible');
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+// Keep logged in within same tab session
+(function() {
+  if (sessionStorage.getItem('cdmc_auth') === '1') {
+    document.getElementById('loginScreen').classList.add('hide');
+    document.getElementById('mainContent').classList.add('visible');
+  }
+})();
+
+// Allow Enter key to submit
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    var ls = document.getElementById('loginScreen');
+    if (!ls.classList.contains('hide')) doLogin();
+  }
+});
+
+// ── THEME TOGGLE ──
+function toggleTheme() {
+  var el = document.documentElement;
+  el.setAttribute('data-theme', el.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+</script>
+</body>
+</html>
