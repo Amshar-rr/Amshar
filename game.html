@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Periodic Table Trainer</title>
+<style>
+:root{
+  --bg1:#0b0f1a; --bg2:#161c2e; --glass:rgba(255,255,255,.06); --glassB:rgba(255,255,255,.14);
+  --accent:#5eead4; --accent2:#818cf8; --good:#22c55e; --bad:#ef4444; --text:#e6e9f2; --dim:#8a92ab;
+}
+*{box-sizing:border-box;}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% -10%,#1e2a4a 0%,var(--bg1) 55%),linear-gradient(160deg,var(--bg1),var(--bg2));
+ font-family:'Segoe UI',system-ui,Arial,sans-serif;color:var(--text);padding:16px;}
+h1{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:.5px;background:linear-gradient(90deg,var(--accent),var(--accent2));
+ -webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block;}
+.sub{color:var(--dim);font-size:13px;margin-bottom:14px;}
+.panel{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--glassB);border-radius:16px;
+ padding:12px 16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+button{cursor:pointer;border:1px solid var(--glassB);background:rgba(255,255,255,.08);color:var(--text);
+ padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;transition:.15s;}
+button:hover{background:rgba(255,255,255,.16);transform:translateY(-1px);}
+button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#0b0f1a;border:none;}
+input#search{background:rgba(255,255,255,.07);border:1px solid var(--glassB);color:var(--text);
+ padding:9px 12px;border-radius:10px;font-size:13px;width:130px;}
+input#search::placeholder{color:var(--dim);}
+.stats{display:flex;gap:18px;margin-left:auto;font-size:13px;color:var(--dim);flex-wrap:wrap;}
+.stats b{color:var(--text);font-size:15px;}
+#prompt{min-height:22px;font-size:15px;font-weight:600;color:var(--accent);}
+.gridwrap{overflow-x:auto;padding-bottom:6px;}
+#grid{display:grid;grid-template-columns:repeat(18,minmax(42px,1fr));gap:5px;min-width:880px;}
+.cell{position:relative;aspect-ratio:1/1;border-radius:9px;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;font-size:11px;user-select:none;outline:none;}
+.cell.gap{visibility:hidden;}
+.cell.active{cursor:pointer;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);transition:.15s;}
+.cell.active:hover{border-color:var(--accent);background:rgba(94,234,212,.12);}
+.cell.active:focus-visible{border-color:var(--accent2);box-shadow:0 0 0 2px var(--accent2);}
+.cell .num{font-size:9px;color:var(--dim);position:absolute;top:3px;left:5px;}
+.cell .sym{font-size:14px;font-weight:700;}
+.cell.hiddencell .sym,.cell.hiddencell .num{opacity:0;}
+.cell.hiddencell::after{content:'';width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);}
+.cell.revealed{background:rgba(129,140,248,.14);border-color:var(--accent2);}
+.cell.correct{background:rgba(34,197,94,.35)!important;border-color:var(--good)!important;animation:pop .3s;}
+.cell.wrong{animation:shake .4s;background:rgba(239,68,68,.35)!important;border-color:var(--bad)!important;}
+.cell.target{box-shadow:0 0 0 2px var(--accent) inset;}
+.cell.searchhit{animation:pulse 1.4s ease-in-out 2;}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(94,234,212,.7)}50%{box-shadow:0 0 0 6px rgba(94,234,212,0)}}
+#tooltip{position:fixed;z-index:50;background:#10162a;border:1px solid var(--glassB);border-radius:10px;
+ padding:10px 12px;font-size:12px;line-height:1.5;pointer-events:none;display:none;box-shadow:0 8px 20px rgba(0,0,0,.5);max-width:200px;}
+#tooltip b{color:var(--accent);}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:60;}
+#modal .box{background:var(--bg2);border:1px solid var(--glassB);border-radius:16px;padding:28px;text-align:center;min-width:260px;}
+#modal h2{margin-top:0;color:var(--accent);}
+footer{color:var(--dim);font-size:11px;margin-top:10px;text-align:center;}
+
+a.homebtn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;cursor:pointer;border:1px solid var(--glassB);background:rgba(255,255,255,.08);color:var(--text);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;transition:.15s;}
+a.homebtn:hover{background:rgba(255,255,255,.16);transform:translateY(-1px);}
+#caution{position:fixed;inset:0;z-index:100;background:rgba(5,8,16,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;}
+#caution.hide{display:none;}
+#caution .cbox{max-width:440px;background:var(--bg2);border:1px solid #f59e0b;border-radius:16px;padding:28px;text-align:center;box-shadow:0 0 40px rgba(245,158,11,.2);}
+#caution .cicon{font-size:42px;line-height:1;margin-bottom:8px;}
+#caution h2{margin:0 0 12px;color:#f59e0b;font-size:20px;letter-spacing:.5px;}
+#caution p{margin:0 0 20px;font-size:14px;line-height:1.7;color:var(--text);}
+#caution .cbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.version{text-align:center;font-size:10px;color:var(--dim);margin-top:14px;letter-spacing:.5px;opacity:.8;}
+@media(max-width:600px){h1{font-size:18px;} .stats{margin-left:0;} }
+</style>
+</head>
+<body>
+
+
+<div id="caution">
+  <div class="cbox">
+    <div class="cicon">⚠️</div>
+    <h2>Caution</h2>
+    <p>This page must not be copied or sold to anyone else without permission.<br>If you do, you will be punished under the law.</p>
+    <div class="cbtns">
+      <button class="primary" id="btnAgree">I Understand</button>
+      <a href="index.html" class="homebtn">🏠 Home</a>
+    </div>
+  </div>
+</div>
+
+<h1>⚛ Periodic Table Trainer</h1>
+<div class="sub">Elements 1–56 + Hg, Rn, Fr, Ra · Blank keyboard mode for memorization</div>
+
+<div class="panel toolbar">
+  <a href="index.html" class="homebtn">🏠 Home</a>
+  <button id="btnShowAll">Show All</button>
+  <button id="btnLearn">Learn Mode</button>
+  <button id="btnTest" class="primary">Start Test</button>
+  <input id="search" placeholder="Search e.g. Fe" maxlength="3">
+  <div class="stats">
+    <div>Score <b id="score">0</b></div>
+    <div>Streak <b id="streak">0</b></div>
+    <div>Best <b id="best">0</b></div>
+    <div>Time <b id="time">0s</b></div>
+  </div>
+</div>
+
+<div class="panel"><div id="prompt">Click "Start Test" to begin, or click any blank cell to learn it. Tab moves between cells.</div></div>
+
+<div class="panel gridwrap"><div id="grid"></div></div>
+
+<footer>Progress auto-saves to your browser (localStorage). No data leaves this page.</footer>
+<div class="version">AmsharJk Repitco · Version 1.2 Small (Demo version)</div>
+
+<div id="tooltip"></div>
+<div id="modal"><div class="box">
+  <h2>Test Complete 🎉</h2>
+  <p id="modalStats"></p>
+  <button class="primary" onclick="closeModal()">Close</button>
+</div></div>
+
+<script>
+const ELS=[
+[1,'H','Hydrogen',1,1,1312.0],[2,'He','Helium',1,18,2372.3],
+[3,'Li','Lithium',2,1,520.2],[4,'Be','Beryllium',2,2,899.5],[5,'B','Boron',2,13,800.6],
+[6,'C','Carbon',2,14,1086.5],[7,'N','Nitrogen',2,15,1402.3],[8,'O','Oxygen',2,16,1313.9],
+[9,'F','Fluorine',2,17,1681.0],[10,'Ne','Neon',2,18,2080.7],
+[11,'Na','Sodium',3,1,495.8],[12,'Mg','Magnesium',3,2,737.7],[13,'Al','Aluminium',3,13,577.5],
+[14,'Si','Silicon',3,14,786.5],[15,'P','Phosphorus',3,15,1011.8],[16,'S','Sulfur',3,16,999.6],
+[17,'Cl','Chlorine',3,17,1251.2],[18,'Ar','Argon',3,18,1520.6],
+[19,'K','Potassium',4,1,418.8],[20,'Ca','Calcium',4,2,589.8],[21,'Sc','Scandium',4,3,633.1],
+[22,'Ti','Titanium',4,4,658.8],[23,'V','Vanadium',4,5,650.9],[24,'Cr','Chromium',4,6,652.9],
+[25,'Mn','Manganese',4,7,717.3],[26,'Fe','Iron',4,8,762.5],[27,'Co','Cobalt',4,9,760.4],
+[28,'Ni','Nickel',4,10,737.1],[29,'Cu','Copper',4,11,745.5],[30,'Zn','Zinc',4,12,906.4],
+[31,'Ga','Gallium',4,13,578.8],[32,'Ge','Germanium',4,14,762.2],[33,'As','Arsenic',4,15,947.0],
+[34,'Se','Selenium',4,16,941.0],[35,'Br','Bromine',4,17,1139.9],[36,'Kr','Krypton',4,18,1350.8],
+[37,'Rb','Rubidium',5,1,403.0],[38,'Sr','Strontium',5,2,549.5],[39,'Y','Yttrium',5,3,600.0],
+[40,'Zr','Zirconium',5,4,640.1],[41,'Nb','Niobium',5,5,652.1],[42,'Mo','Molybdenum',5,6,684.3],
+[43,'Tc','Technetium',5,7,702.0],[44,'Ru','Ruthenium',5,8,710.2],[45,'Rh','Rhodium',5,9,719.7],
+[46,'Pd','Palladium',5,10,804.4],[47,'Ag','Silver',5,11,731.0],[48,'Cd','Cadmium',5,12,867.8],
+[49,'In','Indium',5,13,558.3],[50,'Sn','Tin',5,14,708.6],[51,'Sb','Antimony',5,15,834.0],
+[52,'Te','Tellurium',5,16,869.3],[53,'I','Iodine',5,17,1008.4],[54,'Xe','Xenon',5,18,1170.4],
+[55,'Cs','Caesium',6,1,375.7],[56,'Ba','Barium',6,2,502.9],
+[80,'Hg','Mercury',6,12,1007.1],[86,'Rn','Radon',6,18,1037.0],
+[87,'Fr','Francium',7,1,380.0],[88,'Ra','Radium',7,2,509.3]
+].map(e=>({n:e[0],sym:e[1],name:e[2],period:e[3],group:e[4],ie:e[5]}));
+
+const byPos={}, byNum={}, bySym={};
+ELS.forEach(e=>{byPos[e.period+'-'+e.group]=e; byNum[e.n]=e; bySym[e.sym.toUpperCase()]=e;});
+
+let revealed=new Set(JSON.parse(localStorage.getItem('pt_revealed')||'[]'));
+let best=parseInt(localStorage.getItem('pt_best')||'0');
+let score=0,streak=0,mode='idle',testQueue=[],targetEl=null,timer=null,startTime=null,answered=0,totalQ=20;
+
+document.getElementById('best').textContent=best;
+
+function saveRevealed(){localStorage.setItem('pt_revealed',JSON.stringify([...revealed]));}
+
+function buildGrid(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  for(let p=1;p<=7;p++){
+    for(let g=1;g<=18;g++){
+      const el=byPos[p+'-'+g];
+      const div=document.createElement('div');
+      if(!el){div.className='cell gap';}
+      else{
+        div.className='cell active hiddencell';
+        div.tabIndex=0;
+        div.dataset.n=el.n;
+        div.innerHTML=`<span class="num">${el.n}</span><span class="sym">${el.sym}</span>`;
+        if(revealed.has(el.n)){div.classList.remove('hiddencell');div.classList.add('revealed');}
+        div.addEventListener('click',()=>onCellClick(el,div));
+        div.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();onCellClick(el,div);}});
+        div.addEventListener('mouseenter',ev=>showTip(el,div));
+        div.addEventListener('mouseleave',hideTip);
+      }
+      grid.appendChild(div);
+    }
+  }
+}
+
+function showTip(el,div){
+  if(mode==='test' && !revealed.has(el.n) && !div.classList.contains('revealed'))return;
+  const tip=document.getElementById('tooltip');
+  tip.innerHTML=`<b>${el.name}</b><br>Atomic #: ${el.n}<br>Group: ${el.group}<br>1st Ionization: ${el.ie} kJ/mol`;
+  const r=div.getBoundingClientRect();
+  tip.style.left=Math.min(r.left,window.innerWidth-210)+'px';
+  tip.style.top=(r.bottom+8)+'px';
+  tip.style.display='block';
+}
+function hideTip(){document.getElementById('tooltip').style.display='none';}
+
+function onCellClick(el,div){
+  if(mode==='test'){
+    handleTestClick(el,div);
+    return;
+  }
+  // learn / idle: reveal this cell
+  revealed.add(el.n);
+  saveRevealed();
+  div.classList.remove('hiddencell');
+  div.classList.add('revealed');
+  showTip(el,div);
+}
+
+function toggleShowAll(){
+  const cells=document.querySelectorAll('.cell.active');
+  const allShown=[...cells].every(c=>!c.classList.contains('hiddencell'));
+  cells.forEach(c=>{
+    if(allShown){c.classList.add('hiddencell');c.classList.remove('revealed');}
+    else{c.classList.remove('hiddencell');c.classList.add('revealed');
+      revealed.add(parseInt(c.dataset.n));}
+  });
+  if(!allShown)saveRevealed();
+  document.getElementById('btnShowAll').textContent=allShown?'Show All':'Hide All';
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('btnLearn').style.outline=m==='learn'?'2px solid var(--accent)':'none';
+}
+
+function startTest(){
+  mode='test';
+  document.querySelectorAll('.cell.active').forEach(c=>{
+    c.classList.add('hiddencell');c.classList.remove('revealed','correct','wrong','target');
+  });
+  score=0;streak=0;answered=0;
+  updateStats();
+  const pool=[...ELS];
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  testQueue=pool.slice(0,totalQ);
+  startTime=Date.now();
+  clearInterval(timer);
+  timer=setInterval(()=>{document.getElementById('time').textContent=Math.floor((Date.now()-startTime)/1000)+'s';},500);
+  nextTarget();
+}
+
+function nextTarget(){
+  document.querySelectorAll('.cell.target').forEach(c=>c.classList.remove('target'));
+  if(testQueue.length===0){endTest();return;}
+  targetEl=testQueue.shift();
+  document.getElementById('prompt').innerHTML=`🎯 Find: <b>${targetEl.n} — ${targetEl.name}</b> (${targetEl.sym})`;
+}
+
+function handleTestClick(el,div){
+  if(!targetEl || div.classList.contains('revealed'))return;
+  answered++;
+  if(el.n===targetEl.n){
+    div.classList.remove('hiddencell');
+    div.classList.add('correct','revealed');
+    score+=10;streak++;
+    if(streak>best){best=streak;localStorage.setItem('pt_best',best);}
+  } else {
+    div.classList.add('wrong');
+    streak=0;
+    setTimeout(()=>div.classList.remove('wrong'),400);
+  }
+  updateStats();
+  setTimeout(nextTarget,450);
+}
+
+function endTest(){
+  clearInterval(timer);
+  mode='idle';
+  const secs=Math.floor((Date.now()-startTime)/1000);
+  document.getElementById('prompt').textContent='Test complete! Click "Start Test" to try again.';
+  document.getElementById('modalStats').innerHTML=`Score: <b>${score}</b><br>Accuracy: <b>${Math.round(totalQ/answered*100)||0}%</b><br>Time: <b>${secs}s</b><br>Best Streak: <b>${best}</b>`;
+  document.getElementById('modal').style.display='flex';
+}
+function closeModal(){document.getElementById('modal').style.display='none';}
+
+function updateStats(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('streak').textContent=streak;
+  document.getElementById('best').textContent=best;
+}
+
+document.getElementById('search').addEventListener('input',e=>{
+  const q=e.target.value.trim().toUpperCase();
+  document.querySelectorAll('.cell.searchhit').forEach(c=>c.classList.remove('searchhit'));
+  if(!q)return;
+  const el=bySym[q];
+  if(el){
+    const div=document.querySelector(`.cell[data-n="${el.n}"]`);
+    if(div){div.classList.add('searchhit');div.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});}
+  }
+});
+
+document.getElementById('btnShowAll').addEventListener('click',toggleShowAll);
+document.getElementById('btnLearn').addEventListener('click',()=>setMode(mode==='learn'?'idle':'learn'));
+document.getElementById('btnTest').addEventListener('click',startTest);
+
+document.getElementById('btnAgree').addEventListener('click',()=>document.getElementById('caution').classList.add('hide'));
+buildGrid();
+</script>
+</body>
+</html>
