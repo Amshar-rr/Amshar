@@ -15,8 +15,8 @@
   <script>
   // Opened from the home-screen shortcut? Show only the day count + quote.
   (function(){
-    var sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true||/[?&]source=pwa/.test(location.search)||/B4ThinkinApp/.test(navigator.userAgent);
-    if(sa)document.documentElement.classList.add('pwa-mode');
+    // Inside the Android app: show the FULL website, just hide the "Get the app" bar.
+    if(/B4ThinkinApp/.test(navigator.userAgent))document.documentElement.classList.add('in-app');
   })();
   </script>
 
@@ -530,7 +530,7 @@ html[data-theme="light"]{--bg:#eef2fb;--bg2:#ffffff;--bg3:#e4e9f6;--pink:#0d9488
 #a2hs .a2-txt small{display:block;color:var(--muted);font-size:0.72rem;margin-top:2px;}
 #a2hs .a2-add{background:var(--pink);color:#06201c;border:none;border-radius:8px;padding:0.5rem 0.9rem;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;cursor:pointer;}
 #a2hs .a2-x{background:none;border:none;color:var(--muted);font-size:1.3rem;line-height:1;cursor:pointer;padding:0 0.2rem;}
-html.pwa-mode #a2hs{display:none;}
+html.in-app #a2hs{display:none !important;}
 
 /* ── SHORTCUT (STANDALONE) HOME ── */
 #pwa-home{display:none;}
@@ -1290,7 +1290,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
 }
 (function(){
-  if(document.documentElement.classList.contains('pwa-mode'))return;
+  if(document.documentElement.classList.contains('in-app'))return;
   var bar=document.getElementById('a2hs'),addBtn=document.getElementById('a2-add'),xBtn=document.getElementById('a2-x'),apk=document.getElementById('a2-apk'),sub=document.getElementById('a2-sub');
   var deferred=null,shown=false;
   /* APK location: if the site runs on GitHub Pages the release link is worked out automatically.

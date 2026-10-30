@@ -2,7 +2,7 @@
   "name": "B4Thinkin'",
   "short_name": "B4Thinkin'",
   "description": "Free study tools for Sri Lankan students.",
-  "start_url": "./index.html?source=pwa",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f1626",
