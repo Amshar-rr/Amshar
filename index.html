@@ -1203,11 +1203,11 @@ function sendEmail() {
       to_email:   e,
       to_name:    n,
       subject:    'Re: ' + (su || 'Your message'),
-      message:    'Thank you so much for reaching out. I truly appreciate you taking the time to send me a message. At the moment, I am unable to respond personally because I am currently busy with my A/Level studies and have very limited access to my devices. I will get back to you as soon as I possibly can. Thank you for your patience and understanding. — Amshar'
+      message:    'Ongda Message paitutu. We will reach out you soon', 
     }).catch(function(){});
 
     s.className = 'form-status success';
-    s.textContent = 'Your message was sent! An auto-reply has been sent to your email. I will respond as soon as possible.';
+    s.textContent = 'Your message was sent!';
     document.getElementById('from_name').value  = '';
     document.getElementById('from_email').value = '';
     document.getElementById('subject').value    = '';
@@ -1315,7 +1315,7 @@ if('serviceWorker' in navigator){
 <div id="chat" role="dialog" aria-label="Chat with Amshar" hidden>
   <div class="ch-h"><b>Ask Amshar</b><button type="button" onclick="closeChat()" aria-label="Close chat">&times;</button></div>
   <div id="ch-log" aria-live="polite"></div>
-  <div class="ch-n">Chats are deleted after 2 days. Don't share your private details here. No one can read your question. You've logged in as a guest. </div>
+  <div class="ch-n">Chats are deleted after 2 days. Don't share your private details here. No one can read your question.(Except me) You've logged in as a guest. </div>
   <div class="ch-f"><input id="ch-in" maxlength="600" placeholder="Type your doubt..." aria-label="Message"><button id="ch-send" type="button">Send</button></div>
 </div>
 <script>
