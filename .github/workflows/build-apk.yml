@@ -64,8 +64,11 @@ jobs:
           npx cap add android
           # Android needs the apostrophe in the app name escaped: B4Thinkin\'
           python3 - <<'PY'
+          import re
           p = "android/app/src/main/res/values/strings.xml"
-          s = open(p).read().replace("\\'", "'").replace("'", "\\'")
+          s = open(p).read()
+          # only touch text between tags, never the <?xml version='1.0'?> line
+          s = re.sub(r">([^<]*)<", lambda m: ">" + m.group(1).replace("\\'", "'").replace("'", "\\'") + "<", s)
           open(p, "w").write(s)
           PY
           grep -n "B4Thinkin" android/app/src/main/res/values/strings.xml
@@ -103,7 +106,12 @@ jobs:
             rm ../release.jks
           else
             echo "::warning::No signing key secrets found. Building a debug-signed APK (updates over an older install may be refused)."
-            ./gradlew assembleDebug --no-daemon
+            if ! ./gradlew assembleDebug --no-daemon > ../gradle.log 2>&1; then
+              tail -n 60 ../gradle.log
+              MSG=$(grep -m1 -A12 "What went wrong" ../gradle.log | tr '\n' ' ' | cut -c1-900)
+              echo "::error title=Gradle failed::$MSG"
+              exit 1
+            fi
             cp app/build/outputs/apk/debug/app-debug.apk ../B4Thinkin.apk
           fi
 
@@ -118,4 +126,4 @@ jobs:
           tag_name: app-${{ github.run_number }}
           name: B4Thinkin' app build ${{ github.run_number }}
           make_latest: true
-          files: build/B4Thinkin.apk
+          files: build/B4Thinkin.apk 
