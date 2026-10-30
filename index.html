@@ -570,6 +570,7 @@ html.pwa-mode body{overflow:hidden;}
 .ch-n{font-size:.72rem;color:var(--muted);padding:.3rem .9rem}
 .ch-f{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--border)}.ch-f input{flex:1;background:var(--input-bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;font:inherit}
 .ch-f button{background:var(--pink);color:#06201c;border:0;border-radius:8px;padding:.5rem 1rem;font-weight:600;cursor:pointer}
+.m img{max-width:100%;border-radius:8px;display:block}.m audio{max-width:100%;height:40px}
 </style>
 </head>
 <body>
@@ -868,7 +869,7 @@ html.pwa-mode body{overflow:hidden;}
 <footer>
   <span class="footer-txt">© 2025 <span>Amshar</span> · Sri Lanka</span>
   <span class="footer-txt">Built with foundation.</span>
-</footer>
+<div style="text-align:center;padding:.4rem"><a href="admin.html" style="color:var(--muted);font-size:.8rem">Admin</a></div></footer>
 
 
 <!-- ═══ AI CHAT ═══ -->
@@ -1347,13 +1348,17 @@ B4.watch(render);
 /* live chat: messages are temporary (2 days) */
 var SID=localStorage.getItem('b4sid');
 if(!SID){SID=Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(12)),function(b){return('0'+b.toString(16)).slice(-2)}).join('');localStorage.setItem('b4sid',SID)}
-var timer;
-function paint(){B4.chatGet(SID).then(function(m){var l=$('ch-log');l.innerHTML='';
- var g=document.createElement('div');g.className='m a';g.textContent=S.about;l.appendChild(g);
- m.forEach(function(x){var d=document.createElement('div');d.className='m '+(x.sender==='admin'?'a':'s');d.textContent=x.body;l.appendChild(d)});l.scrollTop=l.scrollHeight})}
-window.openChat=function(){$('chat').hidden=false;$('chat-fab').hidden=true;paint();clearInterval(timer);timer=setInterval(paint,4000);$('ch-in').focus()};
+var timer,started=false,last=0;
+function bubble(m){var l=$('ch-log'),d=document.createElement('div');d.className='m '+(m.sender==='admin'?'a':'s');
+ if(m.media&&/^data:(image|audio)\//.test(m.media)){
+  if(m.media_type==='image'){var im=new Image();im.src=m.media;im.alt='Photo from Amshar';d.appendChild(im)}
+  else{var au=document.createElement('audio');au.controls=true;au.src=m.media;d.appendChild(au)}}
+ if(m.body){var p=document.createElement('div');p.textContent=m.body;d.appendChild(p)}
+ l.appendChild(d);l.scrollTop=l.scrollHeight}
+function poll(){B4.chatGet(SID,last).then(function(n){n.forEach(function(m){last=Math.max(last,m.id);bubble(m)})})}
+window.openChat=function(){$('chat').hidden=false;$('chat-fab').hidden=true;if(!started){started=true;bubble({sender:'admin',body:S.about})}poll();clearInterval(timer);timer=setInterval(poll,4000);$('ch-in').focus()};
 window.closeChat=function(){$('chat').hidden=true;$('chat-fab').hidden=false;clearInterval(timer)};
-function send(){var i=$('ch-in'),v=i.value.trim();if(!v)return;i.value='';B4.chatSend(SID,'student',v).then(paint)}
+function send(){var i=$('ch-in'),v=i.value.trim();if(!v)return;i.value='';B4.chatSend(SID,'student',v).then(poll)}
 $('ch-send').onclick=send;$('ch-in').onkeydown=function(e){if(e.key==='Enter')send()};
 })();
 </script>

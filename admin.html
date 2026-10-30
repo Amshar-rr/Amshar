@@ -18,7 +18,7 @@ input,textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--
 textarea{min-height:90px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
 button{font:inherit;font-weight:600;background:var(--acc);color:var(--on);border:0;border-radius:8px;padding:.75rem 1.4rem;cursor:pointer;margin-top:1.2rem}
-.m{padding:.4rem .7rem;border-radius:10px;margin:.3rem 0;max-width:85%}.m.s{background:var(--line)}.m.a{background:var(--acc);color:var(--on);margin-left:auto}.cs{display:block;width:100%;text-align:left;background:var(--bg);color:var(--ink);border:1px solid var(--line);margin-top:.4rem;font-weight:400}.cs.on{border-color:var(--acc)}#cht{max-height:260px;overflow-y:auto;margin-top:.8rem}.muted{color:var(--soft);font-size:.92rem}.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.m{padding:.4rem .7rem;border-radius:10px;margin:.3rem 0;max-width:85%}.m.s{background:var(--line)}.m.a{background:var(--acc);color:var(--on);margin-left:auto}.cs{display:block;width:100%;text-align:left;background:var(--bg);color:var(--ink);border:1px solid var(--line);margin-top:.4rem;font-weight:400}.cs.on{border-color:var(--acc)}#cht{max-height:260px;overflow-y:auto;margin-top:.8rem}.m img{max-width:100%;border-radius:8px;display:block}.m audio{max-width:100%;height:40px}.muted{color:var(--soft);font-size:.92rem}.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 #msg{margin-top:.8rem;font-weight:600}a{color:var(--acc)}
 @media(max-width:600px){.row{grid-template-columns:1fr}}
 </style>
@@ -29,7 +29,7 @@ button{font:inherit;font-weight:600;background:var(--acc);color:var(--on);border
   <p class="muted" id="mode"></p>
 
   <div class="card" id="loginBox">
-    <label for="em">Email</label><input id="em" type="email" autocomplete="username">
+    <label for="em">Email</label><input id="em" type="email" autocomplete="username" value="Amsharjk@gmail.com">
     <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
     <button id="go" type="button">Sign in</button>
     <div id="lmsg" class="muted" role="alert"></div>
@@ -60,8 +60,13 @@ button{font:inherit;font-weight:600;background:var(--acc);color:var(--on);border
     </div>
     <div class="card"><b>Live chat</b> <span class="muted">(chats are deleted after 2 days)</span>
       <div id="chl" style="margin-top:.6rem"></div><div id="cht"></div>
-      <label for="chr">Reply</label><input id="chr" maxlength="600" placeholder="Select a chat, then type your answer">
-      <button id="chs" type="button">Send reply</button> <button id="chp" type="button" style="background:transparent;color:var(--bad);border:1px solid var(--bad)">Clear all chats</button></div>
+      <label for="chr">Reply</label><input id="chr" maxlength="600" placeholder="Select a chat, type a reply, or attach a photo or voice message">
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button id="chs" type="button">Send</button>
+        <button id="chi" type="button" style="background:transparent;color:var(--acc);border:1px solid var(--acc)">Photo</button><input id="chf" type="file" accept="image/*" hidden>
+        <button id="chv" type="button" style="background:transparent;color:var(--acc);border:1px solid var(--acc)">Record voice</button>
+        <button id="chp" type="button" style="background:transparent;color:var(--bad);border:1px solid var(--bad)">Clear all chats</button>
+      </div></div>
     <button id="save" type="button">Save and publish</button>
     <button id="out" type="button" style="background:transparent;color:var(--acc);border:1px solid var(--acc)">Sign out</button>
     <div id="msg" role="status"></div>
@@ -91,14 +96,29 @@ $('save').onclick=function(){
   $('msg').style.color='var(--soft)';$('msg').textContent='Saving…';
   B4.save(v).then(function(ok){$('msg').style.color=ok?'var(--ok)':'var(--bad)';$('msg').textContent=ok?'Saved. The student site is updated.':'Save failed. Sign in again and check your Supabase setup.'});
 };
-var cur=null,ct;
-function chatPaint(){B4.chatAll().then(function(all){var by={};all.forEach(function(m){(by[m.session]=by[m.session]||[]).push(m)});
- var ids=Object.keys(by).sort(function(x,y){return by[y].slice(-1)[0].t-by[x].slice(-1)[0].t}),L=$('chl');L.innerHTML='';if(!ids.length)L.textContent='No active chats.';
- ids.forEach(function(id){var b=document.createElement('button');b.type='button';b.className='cs'+(id===cur?' on':'');b.textContent='Student '+id.slice(0,4)+': '+by[id].slice(-1)[0].body.slice(0,50);b.onclick=function(){cur=id;chatPaint()};L.appendChild(b)});
- var T=$('cht');T.innerHTML='';(by[cur]||[]).forEach(function(m){var d=document.createElement('div');d.className='m '+(m.sender==='admin'?'a':'s');d.textContent=m.body;T.appendChild(d)});T.scrollTop=T.scrollHeight})}
-function startChat(){chatPaint();clearInterval(ct);ct=setInterval(chatPaint,5000)}
-$('chs').onclick=function(){var v=$('chr').value.trim();if(!cur||!v)return;$('chr').value='';B4.chatSend(cur,'admin',v).then(chatPaint)};
-$('chp').onclick=function(){if(confirm('Delete every chat now?'))B4.chatPurge().then(chatPaint)};
+var cur=null,ct,store=[],last=0,rec,chunks,recT;
+function bub(x){var d=document.createElement('div');d.className='m '+(x.sender==='admin'?'a':'s');
+ if(x.media&&/^data:(image|audio)\//.test(x.media)){if(x.media_type==='image'){var im=new Image();im.src=x.media;d.appendChild(im)}else{var au=document.createElement('audio');au.controls=true;au.src=x.media;d.appendChild(au)}}
+ if(x.body){var p=document.createElement('div');p.textContent=x.body;d.appendChild(p)}return d}
+function listPaint(){var by={};store.forEach(function(x){by[x.session]=x});var ids=Object.keys(by).sort(function(a,b){return by[b].id-by[a].id}),L=$('chl');L.innerHTML='';
+ if(!ids.length)L.textContent='No active chats.';
+ ids.forEach(function(id){var b=document.createElement('button');b.type='button';b.className='cs'+(id===cur?' on':'');var l=by[id];b.textContent='Student '+id.slice(0,4)+': '+(l.body?l.body.slice(0,50):(l.media_type==='image'?'[photo]':'[voice message]'));b.onclick=function(){cur=id;listPaint();threadPaint()};L.appendChild(b)})}
+function threadPaint(){var T=$('cht');T.innerHTML='';store.filter(function(x){return x.session===cur}).forEach(function(x){T.appendChild(bub(x))});T.scrollTop=T.scrollHeight}
+function chatPoll(){B4.chatAll(last).then(function(n){if(!n.length)return;n.forEach(function(x){last=Math.max(last,x.id);store.push(x)});listPaint();if(n.some(function(x){return x.session===cur}))threadPaint()})}
+function startChat(){chatPoll();clearInterval(ct);ct=setInterval(chatPoll,4000)}
+function sendMsg(mt,media){if(!cur){alert('Select a chat first.');return}var v=$('chr').value.trim();if(!v&&!media)return;$('chr').value='';B4.chatSend(cur,'admin',v,mt,media).then(chatPoll)}
+$('chs').onclick=function(){sendMsg()};
+$('chr').onkeydown=function(e){if(e.key==='Enter')sendMsg()};
+$('chi').onclick=function(){$('chf').click()};
+$('chf').onchange=function(){var f=this.files[0];this.value='';if(!f)return;var r=new FileReader();r.onload=function(){var i=new Image();i.onload=function(){var s=Math.min(1,800/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);c.getContext('2d').drawImage(i,0,0,c.width,c.height);var u=c.toDataURL('image/jpeg',.7);if(u.length>380000){alert('Photo is too large. Try a smaller one.');return}sendMsg('image',u)};i.src=r.result};r.readAsDataURL(f)};
+$('chv').onclick=async function(){
+ if(rec&&rec.state==='recording'){rec.stop();return}
+ var st;try{st=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){alert('Microphone is not available. Allow microphone access (the site must use https).');return}
+ chunks=[];rec=new MediaRecorder(st,{audioBitsPerSecond:24000});
+ rec.ondataavailable=function(e){chunks.push(e.data)};
+ rec.onstop=function(){clearTimeout(recT);st.getTracks().forEach(function(t){t.stop()});$('chv').textContent='Record voice';var fr=new FileReader();fr.onload=function(){if(fr.result.length>380000){alert('Voice message is too long. Keep it under 45 seconds.');return}sendMsg('audio',fr.result)};fr.readAsDataURL(new Blob(chunks,{type:rec.mimeType}))};
+ rec.start();$('chv').textContent='Stop and send';recT=setTimeout(function(){if(rec.state==='recording')rec.stop()},45000)};
+$('chp').onclick=function(){if(confirm('Delete every chat now?'))B4.chatPurge().then(function(){store=[];last=0;cur=null;listPaint();$('cht').innerHTML=''})};
 if(B4.loggedIn())open();
 })();
 </script>
