@@ -1,4 +1,4 @@
-var CACHE='b4thinkin-v6';
+var CACHE='b4thinkin-v7';
 var CORE=['./','./index.html','./Fav.jpeg','./manifest.webmanifest','./data.js','./config.js','./admin.html','./study.html'];
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(CORE);}).then(function(){return self.skipWaiting();}));
