@@ -18,7 +18,7 @@ async function load(){
 }
 async function save(v){
   if(!live){localStorage.setItem('b4_site',JSON.stringify(v));return true}
-  var r=await rq('/rest/v1/site_content','POST',{key:'site',value:v,updated_at:new Date().toISOString()},{Prefer:'resolution=merge-duplicates,return=minimal'});return r.ok}
+  var r=await rq('/rest/v1/site_content','POST',{key:'site',value:v,updated_at:new Date().toISOString()},{Prefer:'resolution=merge-duplicates,return=minimal'});if(!r.ok){alert('Error '+r.status+': '+await r.text())}return r.ok}
 async function login(email,pw){
   if(!live){if(pw==='demo'){token='demo';sessionStorage.setItem('b4tok','demo');return true}return false}
   var r=await fetch(U+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:K,"Content-Type":"application/json"},body:JSON.stringify({email:email,password:pw})});
