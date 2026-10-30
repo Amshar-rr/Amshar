@@ -15,7 +15,7 @@
   <script>
   // Opened from the home-screen shortcut? Show only the day count + quote.
   (function(){
-    var sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true||/[?&]source=pwa/.test(location.search);
+    var sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true||/[?&]source=pwa/.test(location.search)||/B4ThinkinApp/.test(navigator.userAgent);
     if(sa)document.documentElement.classList.add('pwa-mode');
   })();
   </script>
@@ -589,8 +589,9 @@ html.pwa-mode body{overflow:hidden;}
 <!-- ═══ ADD TO HOME SCREEN ═══ -->
 <div id="a2hs" role="dialog" aria-label="Add to Home screen">
   <img src="Fav.jpeg" alt="">
-  <div class="a2-txt"><span id="a2-title">Add Amshar to your Home screen</span><small id="a2-sub">Quick access, one tap away.</small></div>
+  <div class="a2-txt"><span id="a2-title">Get the B4Thinkin' app</span><small id="a2-sub">Add to your Home screen or download the app.</small></div>
   <button class="a2-add" id="a2-add" type="button">Add</button>
+  <a class="a2-add" id="a2-apk" href="#" hidden style="text-decoration:none;display:none">Get app</a>
   <button class="a2-x" id="a2-x" type="button" aria-label="Close">&times;</button>
 </div>
 
@@ -1288,26 +1289,33 @@ if('serviceWorker' in navigator){
 }
 (function(){
   if(document.documentElement.classList.contains('pwa-mode'))return;
-  var bar=document.getElementById('a2hs'),addBtn=document.getElementById('a2-add'),xBtn=document.getElementById('a2-x');
-  var deferred=null,KEY='a2hsHiddenUntil';
-  function snoozed(){try{return Date.now()<Number(localStorage.getItem(KEY)||0);}catch(e){return false;}}
-  function hide(snooze){bar.classList.remove('show');if(snooze){try{localStorage.setItem(KEY,String(Date.now()+86400000));}catch(e){}}}
-  function show(){if(snoozed())return;setTimeout(function(){bar.classList.add('show');},4500);}
-  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
-  window.addEventListener('beforeinstallprompt',function(e){
-    e.preventDefault();deferred=e;show();
-  });
-  window.addEventListener('appinstalled',function(){hide(false);try{localStorage.setItem(KEY,String(Date.now()+31536000000));}catch(e){}});
-  addBtn.addEventListener('click',function(){
-    if(deferred){deferred.prompt();deferred.userChoice.then(function(){deferred=null;hide(false);});}
-    else{hide(true);}
-  });
-  xBtn.addEventListener('click',function(){hide(true);});
-  if(ios){
-    document.getElementById('a2-sub').textContent='Tap Share, then \u201CAdd to Home Screen\u201D.';
-    addBtn.textContent='OK';
-    show();
+  var bar=document.getElementById('a2hs'),addBtn=document.getElementById('a2-add'),xBtn=document.getElementById('a2-x'),apk=document.getElementById('a2-apk'),sub=document.getElementById('a2-sub');
+  var deferred=null,shown=false;
+  /* APK location: if the site runs on GitHub Pages the release link is worked out automatically.
+     On a custom domain, type the full link here, e.g. 'https://github.com/you/repo/releases/latest/download/B4Thinkin.apk' */
+  var APK_URL='';
+  function apkLink(){
+    if(APK_URL)return APK_URL;
+    var h=location.hostname;if(!/\.github\.io$/.test(h))return '';
+    var owner=h.split('.')[0],seg=location.pathname.split('/')[1],repo=(seg&&!/\.html?$/.test(seg))?seg:owner+'.github.io';
+    return 'https://github.com/'+owner+'/'+repo+'/releases/latest/download/B4Thinkin.apk';
   }
+  var ua=navigator.userAgent,ios=/iphone|ipad|ipod/i.test(ua)&&!window.MSStream,android=/android/i.test(ua);
+  /* Shown on EVERY visit to the website (no snooze). The X only hides it for this page view. */
+  function show(){if(shown)return;shown=true;setTimeout(function(){bar.classList.add('show');},3500);}
+  function hide(){bar.classList.remove('show');}
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;addBtn.style.display='';show();});
+  window.addEventListener('appinstalled',hide);
+  addBtn.addEventListener('click',function(){
+    if(deferred){deferred.prompt();deferred.userChoice.then(function(){deferred=null;hide();});}
+    else if(ios){sub.textContent='Tap Share, then \u201CAdd to Home Screen\u201D.';}
+    else{sub.textContent='Open the browser menu, then tap \u201CAdd to Home screen\u201D.';}
+  });
+  xBtn.addEventListener('click',hide);
+  var link=apkLink();
+  if(android&&link){apk.href=link;apk.hidden=false;apk.style.display='';apk.setAttribute('download','B4Thinkin.apk');}
+  if(ios){sub.textContent='Tap Share, then \u201CAdd to Home Screen\u201D.';addBtn.textContent='How?';show();}
+  else if(android){show();}
 })();
 </script>
 

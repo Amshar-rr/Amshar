@@ -1,0 +1,116 @@
+name: Build Android app (APK)
+
+# The app loads your live website, so normal website edits need NO rebuild.
+# Run this only to (re)build the APK: Actions tab > Build Android app > Run workflow.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/build-apk.yml"
+      - "app/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Work out the website address
+        run: |
+          OWNER=$(echo "${GITHUB_REPOSITORY%%/*}" | tr 'A-Z' 'a-z')
+          REPO="${GITHUB_REPOSITORY##*/}"
+          if [ -n "${{ vars.SITE_URL }}" ]; then URL="${{ vars.SITE_URL }}"
+          elif [ "$(echo $REPO | tr 'A-Z' 'a-z')" = "$OWNER.github.io" ]; then URL="https://$OWNER.github.io/"
+          else URL="https://$OWNER.github.io/$REPO/"; fi
+          case "$URL" in */) ;; *) URL="$URL/";; esac
+          echo "SITE_URL=$URL" >> $GITHUB_ENV
+          echo "App will load: $URL"
+
+      - name: Prepare Capacitor project
+        run: |
+          mkdir -p build/www build/assets
+          rsync -a --exclude build --exclude app --exclude .github --exclude .git --exclude '*.md' ./ build/www/
+          sed "s#__SITE_URL__#$SITE_URL#g" app/offline.html > build/www/offline.html
+          cd build
+          npm init -y >/dev/null
+          npm i @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets@3
+          cat > capacitor.config.json <<JSON
+          {
+            "appId": "com.amsharjk.b4thinkin",
+            "appName": "B4Thinkin'",
+            "webDir": "www",
+            "backgroundColor": "#0b0f1a",
+            "server": { "url": "$SITE_URL", "cleartext": false, "errorPath": "offline.html" },
+            "android": { "appendUserAgent": "B4ThinkinApp", "allowMixedContent": false }
+          }
+          JSON
+          npx cap add android
+          # Android needs the apostrophe in the app name escaped: B4Thinkin\'
+          python3 - <<'PY'
+          p = "android/app/src/main/res/values/strings.xml"
+          s = open(p).read().replace("\\'", "'").replace("'", "\\'")
+          open(p, "w").write(s)
+          PY
+          grep -n "B4Thinkin" android/app/src/main/res/values/strings.xml
+
+      - name: Icons and splash screen
+        run: |
+          cd build
+          convert ../Fav.jpeg -resize 1024x1024 assets/icon-only.png
+          convert ../Fav.jpeg -resize 680x680 -background none -gravity center -extent 1024x1024 assets/icon-foreground.png
+          convert -size 1024x1024 xc:white assets/icon-background.png
+          convert -size 2732x2732 xc:'#0b0f1a' \( ../Fav.jpeg -resize 640x640 \) -gravity center -composite assets/splash.png
+          cp assets/splash.png assets/splash-dark.png
+          npx capacitor-assets generate --android
+
+      - name: Sync and set version
+        run: |
+          cd build
+          npx cap sync android
+          sed -i "s/versionCode 1/versionCode ${GITHUB_RUN_NUMBER}/; s/versionName \"1.0\"/versionName \"1.${GITHUB_RUN_NUMBER}\"/" android/app/build.gradle
+
+      - name: Build APK
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          cd build/android
+          chmod +x gradlew
+          if [ -n "$KS_B64" ]; then
+            ./gradlew assembleRelease --no-daemon
+            echo "$KS_B64" | base64 -d > ../release.jks
+            BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+            $BT/zipalign -p -f 4 app/build/outputs/apk/release/app-release-unsigned.apk ../aligned.apk
+            $BT/apksigner sign --ks ../release.jks --ks-pass env:KS_PASS --key-pass env:KS_PASS --ks-key-alias "$KS_ALIAS" --out ../B4Thinkin.apk ../aligned.apk
+            rm ../release.jks
+          else
+            echo "::warning::No signing key secrets found. Building a debug-signed APK (updates over an older install may be refused)."
+            ./gradlew assembleDebug --no-daemon
+            cp app/build/outputs/apk/debug/app-debug.apk ../B4Thinkin.apk
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: B4Thinkin-apk
+          path: build/B4Thinkin.apk
+
+      - name: Publish release (this is what the website's download button links to)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: app-${{ github.run_number }}
+          name: B4Thinkin' app build ${{ github.run_number }}
+          make_latest: true
+          files: build/B4Thinkin.apk
