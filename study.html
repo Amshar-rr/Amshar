@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study space | B4Thinkin'</title>
+<link rel="icon" type="image/jpeg" href="Fav.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet"><link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f1626">
+<style>
+:root{--bg:#0b0f1a;--card:#161c2e;--ink:#e6e9f2;--soft:#8a92ab;--line:rgba(255,255,255,.12);--acc:#5eead4;--on:#0b0f1a;--tint:#1b2238;--ok:#22c55e;--bad:#ef4444;--ser:"Playfair Display",Georgia,serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:1.05rem/1.6 "Space Grotesk",system-ui,sans-serif}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px;border-radius:4px}
+.w{width:min(820px,100% - 2rem);margin:0 auto;padding-bottom:3rem}
+header{display:flex;justify-content:space-between;align-items:center;padding:1.1rem 0}
+.brand{font:700 1.4rem var(--ser);text-decoration:none;color:var(--ink)}
+header a.h{color:var(--soft);text-decoration:none}
+h1{font:600 2rem var(--ser);margin:.5rem 0 1rem}
+[role=tablist]{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+[role=tab]{font:inherit;color:var(--soft);background:transparent;border:1px solid var(--line);border-radius:999px;padding:.4rem 1rem;cursor:pointer;transition:background .3s ease}
+[role=tab][aria-selected=true]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.4rem;margin-bottom:1rem}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.55rem .8rem;width:100%}
+.r{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}.r>input{flex:1;min-width:140px}
+button.b{font:inherit;font-weight:600;background:var(--acc);color:var(--on);border:0;border-radius:8px;padding:.6rem 1.1rem;cursor:pointer}
+button.g{font:inherit;background:transparent;color:var(--acc);border:1px solid var(--acc);border-radius:8px;padding:.5rem 1rem;cursor:pointer}
+.big{font:600 clamp(3rem,12vw,5rem)/1 var(--ser);font-variant-numeric:tabular-nums;margin:.5rem 0}
+ul{list-style:none;padding:0;margin:.8rem 0 0}
+li{display:flex;gap:.7rem;align-items:center;padding:.55rem 0;border-top:1px solid var(--line)}
+li span{flex:1}li.done span{text-decoration:line-through;color:var(--soft)}
+li button{background:none;border:0;color:var(--bad);cursor:pointer;font:inherit}
+.muted{color:var(--soft);font-size:.93rem}
+.flash{min-height:130px;display:grid;place-items:center;text-align:center;font:600 1.4rem var(--ser);border:1px dashed var(--line);border-radius:12px;padding:1rem;margin:.8rem 0}
+.moods button{font-size:1.6rem;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.3rem .7rem;cursor:pointer}
+.moods button[aria-pressed=true]{border-color:var(--acc);background:var(--tint)}
+.ring{width:140px;height:140px;border-radius:50%;background:var(--tint);border:2px solid var(--acc);margin:1rem auto;display:grid;place-items:center;transition:transform 4s ease-in-out}
+.ring.in{transform:scale(1.35)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="w">
+<header><a class="brand" href="index.html">B4Thinkin'</a><a class="h" href="index.html">Back to home</a></header>
+<h1>Study space</h1>
+<p class="muted">Everything here saves on this device. Permanent saving across devices comes with accounts.</p>
+<div role="tablist" aria-label="Study tools" id="tabs"></div>
+<div id="panel"></div>
+</div>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+function L(k,d){try{var v=JSON.parse(localStorage.getItem('b4_'+k));return v==null?d:v}catch(e){return d}}
+function W(k,v){try{localStorage.setItem('b4_'+k,JSON.stringify(v))}catch(e){}}
+function E(t,p,x){var e=document.createElement(t);if(p)Object.assign(e,p);if(x)x.forEach(function(c){e.appendChild(c)});return e}
+function day(){return Math.floor(Date.now()/864e5)}
+function row(list,onToggle,onDel,label){
+  var u=E('ul');list.forEach(function(it,i){
+    var li=E('li',{className:it.done?'done':''});
+    if(onToggle){var c=E('input',{type:'checkbox',checked:!!it.done,ariaLabel:'Done'});c.style.width='auto';c.onchange=function(){onToggle(i)};li.appendChild(c)}
+    li.appendChild(E('span',{textContent:label(it)}));
+    var d=E('button',{type:'button',textContent:'Delete'});d.onclick=function(){onDel(i)};li.appendChild(d);u.appendChild(li)});
+  return u}
+var tm;
+var T={
+Timer:function(p){
+  var modes={Focus:25,Break:5},m='Focus',left=modes.Focus*60,run=false;
+  var done=L('sessions',{d:day(),n:0});if(done.d!==day())done={d:day(),n:0};
+  var big=E('div',{className:'big'}),info=E('p',{className:'muted'}),sel=E('select',{ariaLabel:'Mode'});
+  Object.keys(modes).forEach(function(k){sel.appendChild(E('option',{value:k,textContent:k+' ('+modes[k]+' min)'}))});
+  function show(){var mm=Math.floor(left/60),ss=left%60;big.textContent=String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');info.textContent='Focus sessions finished today: '+done.n;document.title=run?big.textContent+' | B4Thinkin\'':'Study space | B4Thinkin\''}
+  var go=E('button',{className:'b',type:'button',textContent:'Start'}),rs=E('button',{className:'g',type:'button',textContent:'Reset'});
+  function stop(){clearInterval(tm);run=false;go.textContent='Start'}
+  go.onclick=function(){if(run){stop();show();return}run=true;go.textContent='Pause';tm=setInterval(function(){left--;if(left<=0){stop();if(m==='Focus'){done.n++;W('sessions',done)}left=modes[m]*60;info.textContent='Time is up. Take a short break or start again.'}show()},1000)};
+  rs.onclick=function(){stop();left=modes[m]*60;show()};
+  sel.onchange=function(){m=sel.value;stop();left=modes[m]*60;show()};
+  show();var c=E('div',{className:'card'},[E('div',{className:'muted',textContent:'Work for 25 minutes, then rest for 5.'}),big,E('div',{className:'r'},[go,rs,sel]),info]);p.appendChild(c)},
+Planner:function(p){
+  var tasks=L('tasks',[]),goals=L('goals',{d:day(),list:[]});if(goals.d!==day())goals={d:day(),list:[]};
+  function paint(){p.innerHTML='';
+    var g=E('div',{className:'card'},[E('b',{textContent:"Today's goals"})]);
+    var gi=E('input',{placeholder:'e.g. Finish cell division notes',ariaLabel:'New goal'}),ga=E('button',{className:'b',type:'button',textContent:'Add goal'});
+    ga.onclick=function(){if(!gi.value.trim())return;goals.list.push({t:gi.value.trim()});W('goals',goals);paint()};
+    g.appendChild(E('div',{className:'r'},[gi,ga]));
+    g.appendChild(row(goals.list,function(i){goals.list[i].done=!goals.list[i].done;W('goals',goals);paint()},function(i){goals.list.splice(i,1);W('goals',goals);paint()},function(x){return x.t}));
+    var dn=goals.list.filter(function(x){return x.done}).length;g.appendChild(E('p',{className:'muted',textContent:goals.list.length?dn+' of '+goals.list.length+' goals done today.':'No goals yet. Start with one small one.'}));
+    var t=E('div',{className:'card'},[E('b',{textContent:'Study planner'})]);
+    var ti=E('input',{placeholder:'Task or topic',ariaLabel:'Task'}),td=E('input',{type:'date',ariaLabel:'Due date'}),ta=E('button',{className:'b',type:'button',textContent:'Add task'});
+    ta.onclick=function(){if(!ti.value.trim())return;tasks.push({t:ti.value.trim(),due:td.value});tasks.sort(function(a,b){return(a.due||'9')<(b.due||'9')?-1:1});W('tasks',tasks);paint()};
+    t.appendChild(E('div',{className:'r'},[ti,td,ta]));
+    t.appendChild(row(tasks,function(i){tasks[i].done=!tasks[i].done;W('tasks',tasks);paint()},function(i){tasks.splice(i,1);W('tasks',tasks);paint()},function(x){return x.t+(x.due?' (due '+x.due+')':'')}));
+    p.appendChild(g);p.appendChild(t)}
+  paint()},
+Flashcards:function(p){
+  var cards=L('cards',[]),IV=[0,1,3,7,14],cur=null,shown=false;
+  function paint(){p.innerHTML='';
+    var due=cards.filter(function(c){return c.due<=day()}),card=E('div',{className:'card'});
+    card.appendChild(E('b',{textContent:'Review ('+due.length+' due of '+cards.length+')'}));
+    if(!cards.length)card.appendChild(E('p',{className:'muted',textContent:'Add your first card below.'}));
+    else if(!due.length)card.appendChild(E('p',{className:'muted',textContent:'All caught up. Cards return when they are due.'}));
+    else{cur=cur&&due.indexOf(cur)>-1?cur:due[0];
+      card.appendChild(E('div',{className:'flash',textContent:shown?cur.b:cur.f}));
+      var r=E('div',{className:'r'});
+      if(!shown){var s=E('button',{className:'b',type:'button',textContent:'Show answer'});s.onclick=function(){shown=true;paint()};r.appendChild(s)}
+      else{[['Got it',1],['Again',0]].forEach(function(o){var b=E('button',{className:o[1]?'b':'g',type:'button',textContent:o[0]});b.onclick=function(){cur.box=o[1]?Math.min(cur.box+1,4):0;cur.due=day()+IV[cur.box]+(o[1]?0:0);if(!o[1])cur.due=day();W('cards',cards);shown=false;cur=null;paint()};r.appendChild(b)})}
+      card.appendChild(r)}
+    var add=E('div',{className:'card'},[E('b',{textContent:'Add a card'})]),f=E('input',{placeholder:'Front (question)',ariaLabel:'Front'}),b=E('input',{placeholder:'Back (answer)',ariaLabel:'Back'}),a=E('button',{className:'b',type:'button',textContent:'Save card'});
+    a.onclick=function(){if(!f.value.trim()||!b.value.trim())return;cards.push({f:f.value.trim(),b:b.value.trim(),box:0,due:day()});W('cards',cards);paint()};
+    add.appendChild(E('div',{className:'r'},[f,b,a]));
+    add.appendChild(row(cards,null,function(i){cards.splice(i,1);W('cards',cards);cur=null;paint()},function(x){return x.f+' → '+x.b}));
+    p.appendChild(card);p.appendChild(add)}
+  paint()},
+Mistakes:function(p){
+  var ms=L('mistakes',[]);
+  function paint(){p.innerHTML='';var c=E('div',{className:'card'},[E('b',{textContent:'Mistake notebook'}),E('p',{className:'muted',textContent:'Write down what you got wrong and the right idea. Review it before exams.'})]);
+    var sub=E('input',{placeholder:'Subject / topic',ariaLabel:'Topic'}),w=E('textarea',{placeholder:'What I got wrong, and what is correct',ariaLabel:'Mistake',rows:3}),a=E('button',{className:'b',type:'button',textContent:'Save mistake'});
+    a.onclick=function(){if(!w.value.trim())return;ms.unshift({t:sub.value.trim()||'General',m:w.value.trim()});W('mistakes',ms);paint()};
+    c.appendChild(sub);c.appendChild(E('div',{style:'height:.5rem'}));c.appendChild(w);c.appendChild(E('div',{className:'r'},[a]));
+    c.appendChild(row(ms,null,function(i){ms.splice(i,1);W('mistakes',ms);paint()},function(x){return x.t+': '+x.m}));p.appendChild(c)}
+  paint()},
+Wellbeing:function(p){
+  var mood=L('mood',{}),F=[['😞','Low'],['😕','Meh'],['😐','Okay'],['🙂','Good'],['😄','Great']];
+  var c=E('div',{className:'card'},[E('b',{textContent:'How are you feeling today?'})]),mw=E('div',{className:'r moods'}),log=E('p',{className:'muted'});
+  function lg(){var k=Object.keys(mood).sort().slice(-7);log.textContent=k.length?'Recent: '+k.map(function(x){return F[mood[x]][1]}).join(', '):'Only you can see this.'}
+  F.forEach(function(f,i){var b=E('button',{type:'button',textContent:f[0],ariaLabel:f[1]});b.setAttribute('aria-pressed',mood[day()]===i);b.onclick=function(){mood[day()]=i;W('mood',mood);[].forEach.call(mw.children,function(x,j){x.setAttribute('aria-pressed',j===i)});lg()};mw.appendChild(b)});
+  c.appendChild(mw);c.appendChild(log);lg();
+  var b2=E('div',{className:'card'},[E('b',{textContent:'One-minute breathing'}),E('p',{className:'muted',textContent:'Breathe in as the circle grows, out as it shrinks.'})]),ring=E('div',{className:'ring',textContent:'Ready'}),bt=E('button',{className:'b',type:'button',textContent:'Start'}),br,on=false;
+  bt.onclick=function(){if(on){clearInterval(br);on=false;bt.textContent='Start';ring.className='ring';ring.textContent='Ready';return}on=true;bt.textContent='Stop';var s=true;function step(){ring.className='ring'+(s?' in':'');ring.textContent=s?'In':'Out';s=!s}step();br=setInterval(step,4000)};
+  b2.appendChild(ring);b2.appendChild(E('div',{className:'r'},[bt]));
+  var n=E('div',{className:'card'},[E('p',{className:'muted',textContent:'This site is student-made and is not a substitute for a teacher or counsellor. If you feel overwhelmed, talk to a trusted adult.'})]);
+  p.appendChild(c);p.appendChild(b2);p.appendChild(n)}
+};
+var names=Object.keys(T),tabs=$('#tabs'),panel=$('#panel');
+function pick(n){clearInterval(tm);[].forEach.call(tabs.children,function(b){b.setAttribute('aria-selected',b.textContent===n)});panel.innerHTML='';T[n](panel);history.replaceState(null,'','#'+n)}
+names.forEach(function(n){var b=E('button',{type:'button',textContent:n});b.setAttribute('role','tab');b.onclick=function(){pick(n)};tabs.appendChild(b)});
+pick(names.indexOf(location.hash.slice(1))>-1?location.hash.slice(1):'Timer');
+})();
+</script>
+</body>
+</html>

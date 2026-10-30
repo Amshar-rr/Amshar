@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>B4Thinkin' Admin</title>
+<style>
+:root{--bg:#f3f5fa;--card:#fff;--ink:#14213d;--soft:#46526b;--line:#d8deea;--acc:#2a5bd7;--on:#fff;--ok:#157347;--bad:#b42318}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1626;--card:#172036;--ink:#eef2fb;--soft:#aab5cc;--line:#2a3652;--acc:#8fb0ff;--on:#0f1626;--ok:#5fd394;--bad:#ff8f85}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.w{width:min(760px,100% - 2rem);margin:2rem auto}
+h1{font:600 1.7rem Georgia,serif;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.4rem;margin-top:1rem}
+label{display:block;font-weight:600;margin:1rem 0 .3rem}
+input,textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.6rem .8rem}
+textarea{min-height:90px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+button{font:inherit;font-weight:600;background:var(--acc);color:var(--on);border:0;border-radius:8px;padding:.75rem 1.4rem;cursor:pointer;margin-top:1.2rem}
+.m{padding:.4rem .7rem;border-radius:10px;margin:.3rem 0;max-width:85%}.m.s{background:var(--line)}.m.a{background:var(--acc);color:var(--on);margin-left:auto}.cs{display:block;width:100%;text-align:left;background:var(--bg);color:var(--ink);border:1px solid var(--line);margin-top:.4rem;font-weight:400}.cs.on{border-color:var(--acc)}#cht{max-height:260px;overflow-y:auto;margin-top:.8rem}.muted{color:var(--soft);font-size:.92rem}.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+#msg{margin-top:.8rem;font-weight:600}a{color:var(--acc)}
+@media(max-width:600px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="top"><h1>B4Thinkin' Admin</h1><a href="index.html" target="_blank" rel="noopener">View student site</a></div>
+  <p class="muted" id="mode"></p>
+
+  <div class="card" id="loginBox">
+    <label for="em">Email</label><input id="em" type="email" autocomplete="username">
+    <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+    <button id="go" type="button">Sign in</button>
+    <div id="lmsg" class="muted" role="alert"></div>
+  </div>
+
+  <div id="editor" hidden>
+    <div class="card">
+      <label for="ann">Announcement banner (leave empty to hide)</label><input id="ann">
+      <div class="row">
+        <div><label for="exn">Exam name</label><input id="exn"></div>
+        <div><label for="exd">Exam date</label><input id="exd" type="date"></div>
+      </div>
+    </div>
+    <div class="card">
+      <b>Daily question</b>
+      <label for="qq">Question</label><input id="qq">
+      <div class="row">
+        <div><label for="o0">Option A</label><input id="o0"></div><div><label for="o1">Option B</label><input id="o1"></div>
+        <div><label for="o2">Option C</label><input id="o2"></div><div><label for="o3">Option D</label><input id="o3"></div>
+      </div>
+      <label for="ans">Correct answer</label>
+      <select id="ans"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+      <label for="exp">Explanation shown after answering</label><textarea id="exp"></textarea>
+    </div>
+    <div class="card">
+      <label for="qts">Daily thoughts (one per line; one shows each day)</label><textarea id="qts"></textarea>
+      <label for="abt">Chat greeting shown to students</label><textarea id="abt"></textarea>
+    </div>
+    <div class="card"><b>Live chat</b> <span class="muted">(chats are deleted after 2 days)</span>
+      <div id="chl" style="margin-top:.6rem"></div><div id="cht"></div>
+      <label for="chr">Reply</label><input id="chr" maxlength="600" placeholder="Select a chat, then type your answer">
+      <button id="chs" type="button">Send reply</button> <button id="chp" type="button" style="background:transparent;color:var(--bad);border:1px solid var(--bad)">Clear all chats</button></div>
+    <button id="save" type="button">Save and publish</button>
+    <button id="out" type="button" style="background:transparent;color:var(--acc);border:1px solid var(--acc)">Sign out</button>
+    <div id="msg" role="status"></div>
+  </div>
+</div>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+$('mode').textContent=B4.live?'Connected to your live database. Changes appear on the student site within seconds.':'Demo mode: changes save in this browser only. Add your Supabase details in config.js to go live. Demo password: demo';
+function fill(s){
+  $('ann').value=s.announcement||'';$('exn').value=s.examName;$('exd').value=s.examDate;
+  $('qq').value=s.question.q;for(var i=0;i<4;i++)$('o'+i).value=s.question.options[i]||'';
+  $('ans').value=s.question.answer;$('exp').value=s.question.explain||'';
+  $('qts').value=(s.quotes||[]).join('\n');$('abt').value=s.about;
+}
+function open(){$('loginBox').hidden=true;$('editor').hidden=false;startChat();B4.load().then(function(s){if(s)fill(s)})}
+$('go').onclick=function(){B4.login($('em').value,$('pw').value).then(function(ok){if(ok)open();else $('lmsg').textContent='Sign-in failed. Check your email and password.'})};
+$('out').onclick=function(){B4.logout();location.reload()};
+$('save').onclick=function(){
+  var o=[0,1,2,3].map(function(i){return $('o'+i).value.trim()}).filter(Boolean);
+  var v={announcement:$('ann').value.trim(),examName:$('exn').value.trim(),examDate:$('exd').value,
+    question:{q:$('qq').value.trim(),options:o,answer:Math.min(+$('ans').value,o.length-1),explain:$('exp').value.trim()},
+    quotes:$('qts').value.split('\n').map(function(x){return x.trim()}).filter(Boolean),about:$('abt').value.trim()};
+  if(!v.question.q||o.length<2||!v.examDate){$('msg').style.color='var(--bad)';$('msg').textContent='Add a question, at least two options and an exam date.';return}
+  $('msg').style.color='var(--soft)';$('msg').textContent='Saving…';
+  B4.save(v).then(function(ok){$('msg').style.color=ok?'var(--ok)':'var(--bad)';$('msg').textContent=ok?'Saved. The student site is updated.':'Save failed. Sign in again and check your Supabase setup.'});
+};
+var cur=null,ct;
+function chatPaint(){B4.chatAll().then(function(all){var by={};all.forEach(function(m){(by[m.session]=by[m.session]||[]).push(m)});
+ var ids=Object.keys(by).sort(function(x,y){return by[y].slice(-1)[0].t-by[x].slice(-1)[0].t}),L=$('chl');L.innerHTML='';if(!ids.length)L.textContent='No active chats.';
+ ids.forEach(function(id){var b=document.createElement('button');b.type='button';b.className='cs'+(id===cur?' on':'');b.textContent='Student '+id.slice(0,4)+': '+by[id].slice(-1)[0].body.slice(0,50);b.onclick=function(){cur=id;chatPaint()};L.appendChild(b)});
+ var T=$('cht');T.innerHTML='';(by[cur]||[]).forEach(function(m){var d=document.createElement('div');d.className='m '+(m.sender==='admin'?'a':'s');d.textContent=m.body;T.appendChild(d)});T.scrollTop=T.scrollHeight})}
+function startChat(){chatPaint();clearInterval(ct);ct=setInterval(chatPaint,5000)}
+$('chs').onclick=function(){var v=$('chr').value.trim();if(!cur||!v)return;$('chr').value='';B4.chatSend(cur,'admin',v).then(chatPaint)};
+$('chp').onclick=function(){if(confirm('Delete every chat now?'))B4.chatPurge().then(chatPaint)};
+if(B4.loggedIn())open();
+})();
+</script>
+</body>
+</html>

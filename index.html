@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#0b0f1a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Amshar">
+  <meta name="apple-mobile-web-app-title" content="B4Thinkin'">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script>
   // Opened from the home-screen shortcut? Show only the day count + quote.
@@ -21,9 +21,11 @@
   </script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Amshar</title>
+  <title>B4Thinkin' | Free study platform by Amshar</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="config.js"></script>
+<script src="data.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -541,6 +543,33 @@ html.pwa-mode body{overflow:hidden;}
 #pwa-home .ph-days{position:relative;font-family:var(--serif);font-size:clamp(6rem,30vw,12rem);line-height:1;background:linear-gradient(135deg,var(--text) 30%,var(--pink) 70%,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 #pwa-home .ph-lbl{position:relative;font-family:var(--mono);font-size:0.75rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--muted);margin-bottom:2.8rem;}
 #pwa-home .ph-quote{position:relative;max-width:520px;font-family:var(--serif);font-style:italic;font-size:clamp(1.15rem,4.4vw,1.6rem);line-height:1.55;color:var(--text);}
+
+.b4card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:1.6rem;box-shadow:0 20px 50px -30px #000}
+.b4h{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.b4row{display:flex;flex-wrap:wrap;gap:1.2rem 2rem;align-items:center;justify-content:space-between}
+.b4ann{border:1px solid var(--pink);border-radius:12px;padding:.7rem 1rem;margin-bottom:1rem}
+.b4grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem}
+.tool{transition:transform .3s,border-color .3s}.tool:hover{transform:translateY(-6px);border-color:var(--pink)}.tool p{color:var(--muted);margin:.4rem 0 1rem}
+.b4q{font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--text)!important}
+#b-q{font-family:var(--serif);font-size:1.35rem;line-height:1.35;margin:.4rem 0 1rem}
+#b-opts{display:grid;gap:.5rem}
+#b-opts button{text-align:left;font:inherit;color:var(--text);background:transparent;border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;cursor:pointer;transition:border-color .3s,transform .3s}
+#b-opts button:hover:not(:disabled){border-color:var(--pink);transform:translateX(4px)}
+#b-opts .ok{border-color:#22c55e;background:rgba(34,197,94,.12)}#b-opts .no{border-color:#ef4444;background:rgba(239,68,68,.1)}
+#b-fb{margin-top:.8rem;color:var(--muted);font-size:.95rem;min-height:1.5em}#b-streak{font-weight:600;color:var(--pink)}
+.feat{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.2rem;margin-top:1.5rem}
+.fc h4{font-family:var(--serif);font-size:1.15rem;margin-bottom:.8rem}.fc ul{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:.4rem}
+.fc li{font-size:.82rem;border:1px dashed var(--border);color:var(--muted);border-radius:999px;padding:.15rem .7rem}
+.fc li.on{border:1px solid var(--pink);color:var(--text);background:rgba(94,234,212,.1)}
+#chat-fab{position:fixed;right:1.2rem;bottom:1.2rem;z-index:9400;background:var(--pink);color:#06201c;border:0;border-radius:999px;padding:.8rem 1.3rem;font-weight:600;cursor:pointer;box-shadow:0 10px 30px -8px var(--pink)}
+#chat{position:fixed;right:1.2rem;bottom:1.2rem;z-index:9400;width:min(92vw,360px);height:min(70vh,470px);display:flex;flex-direction:column;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 60px -20px #000;overflow:hidden}
+#chat[hidden]{display:none}
+.ch-h{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;border-bottom:1px solid var(--border)}.ch-h button{background:none;border:0;color:var(--text);font-size:1.4rem;cursor:pointer}
+#ch-log{flex:1;overflow-y:auto;padding:.8rem;display:flex;flex-direction:column;gap:.5rem}
+.m{max-width:85%;padding:.5rem .8rem;border-radius:12px;font-size:.95rem;line-height:1.45;word-break:break-word}.m.a{background:var(--bg3);align-self:flex-start}.m.s{background:var(--pink);color:#06201c;align-self:flex-end}
+.ch-n{font-size:.72rem;color:var(--muted);padding:.3rem .9rem}
+.ch-f{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--border)}.ch-f input{flex:1;background:var(--input-bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;font:inherit}
+.ch-f button{background:var(--pink);color:#06201c;border:0;border-radius:8px;padding:.5rem 1rem;font-weight:600;cursor:pointer}
 </style>
 </head>
 <body>
@@ -549,7 +578,7 @@ html.pwa-mode body{overflow:hidden;}
 <div id="preloader">
   <canvas id="preCanvas"></canvas>
   <div class="pre-center">
-    <div class="pre-name">AMSHAR</div>
+    <div class="pre-name">B4THINKIN'</div>
     <div class="pre-bar"><div class="pre-bar-fill"></div></div>
     <div class="pre-pct" id="prePct">LOADING 0%</div>
   </div>
@@ -573,52 +602,11 @@ html.pwa-mode body{overflow:hidden;}
   <p class="ph-quote" id="ph-quote"></p>
 </div>
 
-<!-- ═══ COUNTDOWN GATE ═══ -->
-<div id="gate">
-  <div class="blob-g1"></div><div class="blob-g2"></div>
-  <div class="gate-inner">
-    <div class="gate-cook"><span class="cook-emoji">🍳</span> Something is cooking!</div>
-    <h1 class="gate-title">The page is being built.</h1>
-    <p class="gate-date">Wait until <span>12 August 2028</span></p>
-    <div><span class="gate-days" id="cd-days-big">--</span><span class="gate-days-lbl">days to go</span></div>
-    <div class="countdown-grid">
-      <div class="cd-box"><span class="cd-num" id="cd-d">--</span><span class="cd-lbl">Days</span></div>
-      <div class="cd-box"><span class="cd-num" id="cd-h">--</span><span class="cd-lbl">Hours</span></div>
-      <div class="cd-box"><span class="cd-num" id="cd-m">--</span><span class="cd-lbl">Minutes</span></div>
-      <div class="cd-box"><span class="cd-num" id="cd-s">--</span><span class="cd-lbl">Seconds</span></div>
-    </div>
-    <p class="gate-cooking" id="cd-msg">Something big is cooking in the kitchen… 🔥</p>
-    <div class="gate-btns">
-      <button class="rbtn" onclick="enterSite()">About Me</button>
-      <button class="rbtn" onclick="toggleUpdates(true)">Updates</button>
-      <a href="game.html" class="rbtn">Play with periodic table</a>
-    </div>
-  </div>
-</div>
-
-<div class="upd-overlay" id="updOverlay">
-  <div class="upd-inner">
-    <div class="upd-head">
-      <h2>What's Cooking 🍳</h2>
-      <button class="diary-close-btn" onclick="toggleUpdates(false)">Close</button>
-    </div>
-    <ul class="upd-list">
-      <li class="upd-item secret"><div class="secret-in"><span class="upd-num">★</span><span>The big secret change</span><span class="upd-tag">Top</span></div></li>
-      <li class="upd-item"><span class="upd-num">01</span><span>Modification of AI</span></li>
-      <li class="upd-item"><span class="upd-num">02</span><span>Numerical patterns of studying</span></li>
-      <li class="upd-item"><span class="upd-num">03</span><span>Many dangerous formulas for calculating the things happening around us</span></li>
-      <li class="upd-item"><span class="upd-num">04</span><span>Physics ideas</span></li>
-      <li class="upd-item"><span class="upd-num">05</span><span>Having chemical molecules in your life</span></li>
-      <li class="upd-item"><span class="upd-num">06</span><span>Related games</span></li>
-    </ul>
-  </div>
-</div>
-
 <!-- ═══ NAV ═══ -->
 <nav>
-  <a href="#" class="nav-logo"><span class="nav-dot"></span>Amshar</a>
+  <a href="#" class="nav-logo"><span class="nav-dot"></span>B4Thinkin'</a>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#about" data-en="About" data-ta="என்னை பற்றி">About</a></li>
+    <li><a href="#b4">B4Thinkin'</a></li><li><a href="study.html">Study space</a></li><li><a href="#about" data-en="About" data-ta="என்னை பற்றி">About</a></li>
     <li><a href="#journey" data-en="Journey" data-ta="பயணம்">Journey</a></li>
     <li><a href="#photos" data-en="Photos" data-ta="படங்கள்">Photos</a></li>
     <li><a href="#contact" data-en="Contact" data-ta="தொடர்பு">Contact</a></li>
@@ -639,7 +627,7 @@ html.pwa-mode body{overflow:hidden;}
 
 <!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#about" onclick="toggleMenu()" data-en="About" data-ta="என்னை பற்றி">About</a>
+  <a href="#b4" onclick="toggleMenu()">B4Thinkin'</a><a href="study.html">Study space</a><a href="#about" onclick="toggleMenu()" data-en="About" data-ta="என்னை பற்றி">About</a>
   <a href="#journey" onclick="toggleMenu()" data-en="Journey" data-ta="பயணம்">Journey</a>
   <a href="#photos" onclick="toggleMenu()" data-en="Photos" data-ta="படங்கள்">Photos</a>
   <a href="#contact" onclick="toggleMenu()" data-en="Contact" data-ta="தொடர்பு">Contact</a>
@@ -651,54 +639,51 @@ html.pwa-mode body{overflow:hidden;}
 </div>
 
 <!-- ═══ HERO ═══ -->
-<div class="hero">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
+<div class="hero" id="top">
+  <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
   <div class="hero-inner">
     <div>
-      <!-- STATUS BAR -->
-      <div class="status-bar">
-        <div class="status-item">
-          <div class="signal-icon">
-            <span class="on"></span><span class="on"></span><span class="on"></span><span id="sig4" class="on"></span>
-          </div>
-          <span class="status-val" id="signal-txt">Full</span>
-        </div>
-        <div class="status-item">
-          <div class="battery-icon"><div class="battery-fill" id="batt-fill" style="width:80%"></div></div>
-          <span class="status-val" id="batt-txt">--</span>
-        </div>
-      </div>
-      <!-- CLOCK -->
-      <div class="clock-wrap">
-        <img class="clock-icon-img" src="https://www.citypng.com/public/uploads/preview/white-clock-icon-symbol-png-7017516950329550pxgzdsjmg.png" alt="clock">
-        <span id="colombo-clock">--:--:-- --</span>&nbsp;·&nbsp;Colombo, LK
-      </div>
-      <div class="hero-badge"><span class="live-dot"></span>275/4, Warana Road, Thihariya, Kalagedihena &nbsp;·&nbsp; Sri Lanka</div>
-      <!-- NAME -->
-      <div class="hero-name-row">
-        <h1 class="hero-name">Amshar</h1>
-        <img class="blue-tick" src="https://www.citypng.com/public/uploads/preview/hd-blue-badge-verified-tick-mark-png-704081694710438adyvtbqafw.png" alt="Verified">
-      </div>
-      <p class="hero-sub" style="display:none"></p>
-      <div class="quran-verse">
-        Indeed, with hardship will be ease.
-        <span class="quran-ref">— Quran 94:6</span>
-      </div>
-      <p class="hero-desc">Age <strong id="hero-age">17</strong>. Born in <strong>Thihariya</strong>. Studying hard and building towards something great. This is my story.</p>
+      <div class="hero-badge"><span class="live-dot"></span>Free study platform &nbsp;·&nbsp; Sri Lanka</div>
+      <div class="hero-name-row"><h1 class="hero-name">B4Thinkin'</h1></div>
+      <div class="quran-verse">Think before you study.<span class="quran-ref">A student-made space by Amshar Jawsak</span></div>
+      <p class="hero-desc">Exam countdown, a daily question with a streak, flashcards, a study planner and live help with your doubts. Everything is free.</p>
       <div class="hero-btns">
-        <a href="#journey" class="rbtn" data-en="My Journey" data-ta="என் பயணம்">My Journey</a>
-        <a href="#photos" class="rbtn" data-en="Photos" data-ta="படங்கள்">Photos</a>
-        <a href="#contact" class="rbtn" data-en="Say Hello" data-ta="வணக்கம் சொல்லுங்கள்">Say Hello</a>
-        <a href="control.html" class="rbtn" data-en="⚙ Control" data-ta="⚙ கட்டுப்பாடு">⚙ Control</a>
+        <a href="study.html" class="rbtn">Open study space</a>
+        <a href="#b4-tools" class="rbtn">Tools</a>
+        <a href="#" class="rbtn" onclick="openChat();return false">Ask Amshar</a>
       </div>
     </div>
-    <div class="avatar-wrap">
-      <img class="hero-photo" src="Hero.png" alt="Amshar Jawsak">
-    </div>
+    <div class="b4card"><div class="b4h">Daily question</div><div id="b-q">Loading...</div><div id="b-opts"></div><p id="b-fb" aria-live="polite"></p><div id="b-streak"></div></div>
   </div>
 </div>
+
+<section class="sec" id="b4">
+  <div id="b-ann" class="b4ann" hidden></div>
+  <div class="b4card"><div class="b4row">
+    <div><div class="b4h">Time left until</div><div id="b-ex" style="font-family:var(--serif);font-size:1.7rem"></div></div>
+    <div class="countdown-grid" style="margin:0">
+      <div class="cd-box"><span class="cd-num" id="cd-d">--</span><span class="cd-lbl">Days</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-h">--</span><span class="cd-lbl">Hours</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-m">--</span><span class="cd-lbl">Minutes</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-s">--</span><span class="cd-lbl">Seconds</span></div>
+    </div></div></div>
+</section>
+
+<section class="sec" id="b4-tools">
+  <h2 class="sec-title">Tools</h2>
+  <div class="b4grid">
+    <div class="b4card tool"><div class="b4h">Study space</div><p>Focus timer, planner, flashcards, mistake notebook and mood check-in.</p><a href="study.html" class="rbtn">Open</a></div>
+    <div class="b4card tool"><div class="b4h">Periodic table game</div><p>Test how well you know the elements.</p><a href="game.html" class="rbtn">Play</a></div>
+    <div class="b4card tool"><div class="b4h">Ask Amshar</div><p>Stuck on a topic? Send your doubt in live chat.</p><a href="#" class="rbtn" onclick="openChat();return false">Start chat</a></div>
+    <div class="b4card tool"><div class="b4h">Thought for today</div><p id="b-quote" class="b4q"></p></div>
+  </div>
+</section>
+
+<section class="sec-dark" id="b4-platform"><div class="sec">
+  <h2 class="sec-title">The full platform</h2>
+  <p class="about-p"><span id="fcount" style="color:var(--pink)"></span>. Filled chips are ready to use; dashed ones are being built.</p>
+  <div class="feat" id="feat"></div>
+</div></section>
 
 <!-- ═══ LOGOS STRIP ═══ -->
 <div class="logos-strip">
@@ -718,7 +703,7 @@ html.pwa-mode body{overflow:hidden;}
 
 <!-- ═══ ABOUT ═══ -->
 <section class="sec" id="about">
-  <div class="sec-label"><span style="color:var(--pink)">01</span><span class="sec-line-sm"></span><span data-en="Who I Am" data-ta="நான் யார்">Who I Am</span></div>
+  <div class="sec-label"><span style="color:var(--pink)">01</span><span class="sec-line-sm"></span><span data-en="About the builder" data-ta="உருவாக்குநர் பற்றி">About the builder</span></div>
   <h2 class="sec-title" data-en="About Me" data-ta="என்னை பற்றி">About Me</h2>
   <div class="about-grid">
     <div>
@@ -847,9 +832,9 @@ html.pwa-mode body{overflow:hidden;}
       <div class="map-section">
         <div class="map-header">
           <div class="map-title-txt">Where I Am</div>
-          <div class="map-sub-txt">275/4, Warana Road, Thihariya, Kalagedihena</div>
+          <div class="map-sub-txt">Thihariya, Sri Lanka</div>
         </div>
-        <iframe class="map-frame" src="https://maps.google.com/maps?q=7.1207951,80.0769337&z=18&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe class="map-frame" src="https://maps.google.com/maps?q=7.1207951,80.0769337&z=13&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </div>
     <div>
@@ -1126,38 +1111,14 @@ function calcAge() {
 calcAge();
 
 
-// ── COUNTDOWN GATE ──
+// ── EXAM COUNTDOWN ──
 var TARGET = new Date('2028-08-12T00:00:00+05:30').getTime();
 function tickCountdown(){
-  var diff = TARGET - Date.now();
-  if(diff <= 0){
-    ['cd-d','cd-h','cd-m','cd-s'].forEach(function(id){document.getElementById(id).textContent='00';});
-    document.getElementById('cd-days-big').textContent='0';
-    document.getElementById('cd-msg').textContent='It is ready! 🎉';
-    return;
-  }
-  var d = Math.floor(diff/86400000);
-  var h = Math.floor(diff%86400000/3600000);
-  var m = Math.floor(diff%3600000/60000);
-  var sec = Math.floor(diff%60000/1000);
-  document.getElementById('cd-days-big').textContent = d;
-  document.getElementById('cd-d').textContent = d;
-  document.getElementById('cd-h').textContent = pad(h);
-  document.getElementById('cd-m').textContent = pad(m);
-  document.getElementById('cd-s').textContent = pad(sec);
+  var diff=Math.max(0,TARGET-Date.now());
+  var v={'cd-d':Math.floor(diff/86400000),'cd-h':pad(Math.floor(diff%86400000/3600000)),'cd-m':pad(Math.floor(diff%3600000/60000)),'cd-s':pad(Math.floor(diff%60000/1000))};
+  for(var k in v){var e=document.getElementById(k);if(e)e.textContent=v[k];}
 }
 tickCountdown(); setInterval(tickCountdown,1000);
-document.body.style.overflow='hidden';
-function enterSite(){
-  var g=document.getElementById('gate');
-  g.classList.add('leave');
-  document.body.style.overflow='';
-  setTimeout(function(){g.style.display='none';window.scrollTo(0,0);},750);
-}
-function toggleUpdates(open){
-  document.getElementById('updOverlay').classList.toggle('open',open);
-}
-document.addEventListener('keydown',function(e){if(e.key==='Escape')toggleUpdates(false);});
 
 // ── EMAIL DISPLAY ──
 document.getElementById('email-display').textContent = ['Amsharjk','gmail.com'].join('@');
@@ -1326,24 +1287,74 @@ if('serviceWorker' in navigator){
 (function(){
   if(document.documentElement.classList.contains('pwa-mode'))return;
   var bar=document.getElementById('a2hs'),addBtn=document.getElementById('a2-add'),xBtn=document.getElementById('a2-x');
-  var deferred=null;
-  function hide(){bar.classList.remove('show');}
-  function show(){setTimeout(function(){bar.classList.add('show');},4500);}
+  var deferred=null,KEY='a2hsHiddenUntil';
+  function snoozed(){try{return Date.now()<Number(localStorage.getItem(KEY)||0);}catch(e){return false;}}
+  function hide(snooze){bar.classList.remove('show');if(snooze){try{localStorage.setItem(KEY,String(Date.now()+86400000));}catch(e){}}}
+  function show(){if(snoozed())return;setTimeout(function(){bar.classList.add('show');},4500);}
   var ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
   window.addEventListener('beforeinstallprompt',function(e){
     e.preventDefault();deferred=e;show();
   });
-  window.addEventListener('appinstalled',function(){hide();});
+  window.addEventListener('appinstalled',function(){hide(false);try{localStorage.setItem(KEY,String(Date.now()+31536000000));}catch(e){}});
   addBtn.addEventListener('click',function(){
-    if(deferred){deferred.prompt();deferred.userChoice.then(function(){deferred=null;hide();});}
-    else{hide();}
+    if(deferred){deferred.prompt();deferred.userChoice.then(function(){deferred=null;hide(false);});}
+    else{hide(true);}
   });
-  xBtn.addEventListener('click',function(){hide();});
+  xBtn.addEventListener('click',function(){hide(true);});
   if(ios){
     document.getElementById('a2-sub').textContent='Tap Share, then \u201CAdd to Home Screen\u201D.';
     addBtn.textContent='OK';
     show();
   }
+})();
+</script>
+
+<button id="chat-fab" type="button" onclick="openChat()" aria-label="Ask Amshar a question">Ask Amshar</button>
+<div id="chat" role="dialog" aria-label="Chat with Amshar" hidden>
+  <div class="ch-h"><b>Ask Amshar</b><button type="button" onclick="closeChat()" aria-label="Close chat">&times;</button></div>
+  <div id="ch-log" aria-live="polite"></div>
+  <div class="ch-n">Chats are deleted after 2 days. Please don't share private details. If you feel unsafe, talk to a trusted adult.</div>
+  <div class="ch-f"><input id="ch-in" maxlength="600" placeholder="Type your doubt..." aria-label="Message"><button id="ch-send" type="button">Send</button></div>
+</div>
+<script>
+var F=[
+["Learn",[["Notes by chapter"],["Flashcards",1],["Glossary (English/Tamil)"],["Simple summaries"],["Video lessons"],["Labelled diagrams"],["Mind maps"],["Revision sheets (PDF)"],["Syllabus tracker"],["Past papers"],["Audio notes"]]],
+["Practice",[["Chapter quizzes"],["Mock tests"],["Daily question + streak",1],["Periodic table game",1],["Weak-topic finder"],["Fill-in questions"],["Essay practice"],["Mistake notebook",1],["Weekly challenge"],["Your own decks",1],["Leaderboard"],["Badges"]]],
+["Plan & track",[["Exam countdown",1],["Study planner",1],["Focus timer",1],["Daily goals",1],["Marks tracker"],["Reminders"],["Habit tracker"],["Timetable"],["Calendar"],["Weekly report"],["Study analytics"],["Bookmarks"]]],
+["Help & community",[["Live chat with Amshar",1],["Ask a question"],["Common questions"],["Topic requests"],["Smart search"],["Next-topic tips"],["Q&A board"],["Study groups"],["Mentors"],["Announcements",1],["Polls"],["Helpful ratings"],["Comments"]]],
+["Wellbeing",[["Calm daily thoughts",1],["Mood check-in",1],["Breathing exercise",1],["Sleep reminders"],["Senior stories"],["Support directory"],["Exam-stress guide"]]],
+["Access",[["Dark & light",1],["English / Tamil",1],["Large text"],["Sinhala"],["Read aloud"],["Dyslexia font"],["Low-data mode"],["Offline notes"],["High contrast"],["Home-screen shortcuts",1]]],
+["Admin & safety",[["Admin controller",1],["Accounts"],["Roles"],["Scheduled posts"],["Analytics dashboard"],["Bulk import"],["Audit log"],["Auto backups"],["Saved replies"],["Abuse queue"]]]
+];
+(function(){
+var $=function(i){return document.getElementById(i)},S=B4.DEF,live=0,all=0;
+F.forEach(function(c){var d=document.createElement('div');d.className='b4card fc';var h=document.createElement('h4');h.textContent=c[0];d.appendChild(h);var u=document.createElement('ul');
+c[1].forEach(function(f){all++;var l=document.createElement('li');l.textContent=f[0];if(f[1]){l.className='on';live++}u.appendChild(l)});d.appendChild(u);$('feat').appendChild(d)});
+$('fcount').textContent=live+' features live, '+(all-live)+' on the way';
+function day(){return Math.floor(Date.now()/864e5)}
+function st(){try{return JSON.parse(localStorage.getItem('b4streak'))||{n:0,d:0}}catch(e){return{n:0,d:0}}}
+function streak(){var s=st(),n=s.d>=day()-1?s.n:0;$('b-streak').textContent=n?'Streak: '+n+(n>1?' days':' day'):'Answer correctly to start a streak.'}
+function answer(i){var q=S.question,bs=$('b-opts').children,ok=i===q.answer;
+ for(var k=0;k<bs.length;k++){bs[k].disabled=true;if(k===q.answer)bs[k].className='ok'}
+ if(!ok)bs[i].className='no';$('b-fb').textContent=(ok?'Correct. ':'Not quite. ')+(q.explain||'');
+ var s=st();if(ok&&s.d!==day()){s.n=s.d===day()-1?s.n+1:1;s.d=day();localStorage.setItem('b4streak',JSON.stringify(s))}streak()}
+function render(s){S=s;var a=$('b-ann');a.hidden=!s.announcement;a.textContent=s.announcement;$('b-ex').textContent=s.examName;
+ var t=new Date(s.examDate+'T00:00:00+05:30').getTime();if(t)window.TARGET=t;
+ var q=s.question;$('b-q').textContent=q.q;var o=$('b-opts');o.innerHTML='';$('b-fb').textContent='';
+ q.options.forEach(function(x,i){var b=document.createElement('button');b.type='button';b.textContent=x;b.onclick=function(){answer(i)};o.appendChild(b)});
+ var qs=(s.quotes||[]).filter(Boolean);$('b-quote').textContent=qs.length?qs[day()%qs.length]:'';streak();tickCountdown()}
+B4.watch(render);
+/* live chat: messages are temporary (2 days) */
+var SID=localStorage.getItem('b4sid');
+if(!SID){SID=Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(12)),function(b){return('0'+b.toString(16)).slice(-2)}).join('');localStorage.setItem('b4sid',SID)}
+var timer;
+function paint(){B4.chatGet(SID).then(function(m){var l=$('ch-log');l.innerHTML='';
+ var g=document.createElement('div');g.className='m a';g.textContent=S.about;l.appendChild(g);
+ m.forEach(function(x){var d=document.createElement('div');d.className='m '+(x.sender==='admin'?'a':'s');d.textContent=x.body;l.appendChild(d)});l.scrollTop=l.scrollHeight})}
+window.openChat=function(){$('chat').hidden=false;$('chat-fab').hidden=true;paint();clearInterval(timer);timer=setInterval(paint,4000);$('ch-in').focus()};
+window.closeChat=function(){$('chat').hidden=true;$('chat-fab').hidden=false;clearInterval(timer)};
+function send(){var i=$('ch-in'),v=i.value.trim();if(!v)return;i.value='';B4.chatSend(SID,'student',v).then(paint)}
+$('ch-send').onclick=send;$('ch-in').onkeydown=function(e){if(e.key==='Enter')send()};
 })();
 </script>
 </body>
